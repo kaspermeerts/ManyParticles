@@ -9,7 +9,7 @@ int main(void)
 	vec3 b = vec3(5,6,7);
 	vec3 c = a + b;
 
-	cout << c.x << endl;
+	cout << c << endl;
 
 	return 0;
 }

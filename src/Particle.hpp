@@ -13,4 +13,6 @@ struct vec3
 	float length(void) const;
 };
 
+std::ostream& operator<<(std::ostream& out, const vec3 &r);
+
 #endif

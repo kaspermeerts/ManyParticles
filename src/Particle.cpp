@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include "Particle.hpp"
 
 vec3::vec3(float a, float b, float c)
@@ -43,4 +44,9 @@ vec3 vec3::operator/(float v) const
 float vec3::length() const
 {
 	return sqrt(x*x + y*y + z*z);
+}
+
+std::ostream& operator<<(std::ostream& s, const vec3& v)
+{
+	return s << "(" << v.x << ", " << v.y << ", " << v.z << ")";
 }
