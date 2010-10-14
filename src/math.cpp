@@ -48,9 +48,24 @@ vec3 vec3::operator/(float v) const
 	return (*this * (1/v));
 }
 
-float vec3::length() const
+float vec3::length(void) const
 {
-	return sqrt(x*x + y*y + z*z);
+	return sqrt(length2());
+}
+
+float vec3::length2(void) const
+{
+	return *this * *this;
+}
+
+float vec3::length(const vec3 &v)
+{
+	return sqrt(length2(v));
+}
+
+float vec3::length2(const vec3 &v)
+{
+	return v * v;
 }
 
 std::ostream& operator<<(std::ostream& s, const vec3& v)

@@ -1,4 +1,4 @@
-OBJECTS = math.o main.o
+OBJECTS = math.o main.o Particle.o Box.o World.o
 
 
 all: main

@@ -1,5 +1,7 @@
-#ifndef _PARTICLE_H_
-#define _PARTICLE_H_
+#ifndef _MATH_H_
+#define _MATH_H_
+
+#include <iostream>
 
 struct vec3
 {
@@ -12,6 +14,9 @@ struct vec3
 	vec3 operator*(float v) const;
 	vec3 operator/(float v) const;
 	float length(void) const;
+	float length2(void) const;
+	static float length(const vec3 &v);
+	static float length2(const vec3 &v);
 };
 
 std::ostream& operator<<(std::ostream& out, const vec3 &r);
