@@ -1,6 +1,6 @@
 #include <cmath>
 #include <iostream>
-#include "Particle.hpp"
+#include "math.hpp"
 
 vec3::vec3(float a, float b, float c) : x(a), y(b), z(c) {}
 
