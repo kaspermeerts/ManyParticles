@@ -2,13 +2,20 @@
 #include <iostream>
 #include "Particle.hpp"
 
-vec3::vec3(float a, float b, float c)
+vec3::vec3(float a, float b, float c) : x(a), y(b), z(c) {}
+
+vec3 &vec3::operator=(const vec3 &v)
 {
-	x = a;
-	y = b;
-	z = c;
-}
+	if(this == &v)
+		return *this;
 	
+	x = v.x;
+	y = v.y;
+	z = v.z;
+
+	return *this;
+}
+
 vec3 vec3::operator+(const vec3 &v) const
 {
 	float a, b, c;
