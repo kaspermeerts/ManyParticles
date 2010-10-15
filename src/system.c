@@ -9,17 +9,12 @@ typedef struct particle
 	Vec3 pos;
 	Vec3 vel;
 	float r;
+	struct particle *next;
 } Particle;
-
-typedef struct partList
-{
-	Particle *particle;
-	struct partList *next;
-} PartList;
 
 typedef struct world
 {
-	PartList **grid;
+	Particle **grid;
 	Particle *parts;
 } World;
 
@@ -32,14 +27,14 @@ typedef struct config
 } Config;
 
 bool collides(const Particle *p);
-PartList **boxFromParticle(const Particle *p);
-PartList **boxAddress(int nx, int ny, int nz);
-bool collideWith(const Particle *p, const PartList *ps);
+Particle **boxFromParticle(const Particle *p);
+Particle **boxAddress(int nx, int ny, int nz);
+bool collideWith(const Particle *p, const Particle *ps);
 
 World world;
 Config config;
 
-PartList **boxFromParticle(const Particle *p)
+Particle **boxFromParticle(const Particle *p)
 {
 	int nx, ny, nz;
 
@@ -50,9 +45,10 @@ PartList **boxFromParticle(const Particle *p)
 	return boxAddress(nx, ny, nz);
 }
 
-PartList **boxAddress(int nx, int ny, int nz)
+Particle **boxAddress(int nx, int ny, int nz)
 {
-	return world.grid + nx * config.numBox * config.numBox + ny * config.numBox + nz;
+	return world.grid + nx * config.numBox * config.numBox + 
+			ny * config.numBox + nz;
 }
 
 bool collides(const Particle *p)
@@ -85,17 +81,15 @@ bool collides(const Particle *p)
 	return false;
 }
 
-bool collideWith(const Particle *p, const PartList *ps)
+bool collideWith(const Particle *p, const Particle *ps)
 {
-	const PartList *other;
-	Particle *op;
+	const Particle *other;
 	Vec3 diff;
 
 	for (other = ps; other; other = other->next)
 	{
-		op = other->particle;
-		sub(&p->pos, &op->pos, &diff);
-		if (length2(&diff) < (p->r + op->r)*(p->r + op->r))
+		sub(&p->pos, &other->pos, &diff);
+		if (length2(&diff) < (p->r + other->r)*(p->r + other->r))
 			return true;
 	}
 
@@ -109,8 +103,7 @@ bool fillWorld()
 	int nb = config.numBox;
 	int i;
 	Particle *ps;
-	PartList *nodes;
-	PartList **box;
+	Particle **box;
 	float worldSize = config.numBox * config.boxSize;
 
 	world.parts = calloc(config.numParticles, sizeof(Particle));
@@ -121,8 +114,6 @@ bool fillWorld()
 		return false;
 	}
 
-	nodes = calloc(config.numParticles, sizeof(*nodes));
-	
 	world.grid = calloc(nb * nb * nb, sizeof(*(world.grid)));
 
 	for (i = 0; i < config.numParticles; i++)
@@ -134,14 +125,20 @@ bool fillWorld()
 			ps[i].pos.z = rand() * worldSize / RAND_MAX;
 		} while (collides(&ps[i]));
 
-		nodes[i].particle = &ps[i];
-		
 		box = boxFromParticle(&ps[i]);
-		nodes[i].next = *box;
-		*box = &nodes[i];
+		ps[i].next = *box;
+		*box = &ps[i];
 	}
 
 	return true;
+}
+
+void freeWorld()
+{
+	free(world.grid);
+	free(world.parts);
+
+	return;
 }
 		
 int main(int argc, char **argv)
@@ -151,6 +148,8 @@ int main(int argc, char **argv)
 	config.numParticles = 1000;
 
 	fillWorld();
+
+	freeWorld();
 
 	return 0;
 }
