@@ -20,7 +20,7 @@ typedef struct world
 
 typedef struct config
 {
-	// The same for every dimension
+	/* The same for every dimension */
 	float boxSize;
 	int numBox;
 	int numParticles;
@@ -30,6 +30,8 @@ bool collides(const Particle *p);
 Particle **boxFromParticle(const Particle *p);
 Particle **boxAddress(int nx, int ny, int nz);
 bool collideWith(const Particle *p, const Particle *ps);
+bool fillWorld(void);
+void freeWorld(void);
 
 World world;
 Config config;

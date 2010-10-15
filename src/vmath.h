@@ -10,6 +10,13 @@ typedef struct Vec3
 
 /* In header for inlining */
 
+void add(const Vec3 *a, const Vec3 *b, Vec3 *dest);
+void sub(const Vec3 *a, const Vec3 *b, Vec3 *dest);
+void scale(const Vec3 *v, float lambda, Vec3 *dest);
+float dot(const Vec3 *v, const Vec3 *w);
+float length2(const Vec3 *v);
+float length(const Vec3 *v);
+
 void add(const Vec3 *a, const Vec3 *b, Vec3 *dest)
 {
 	dest->x = a->x + b->x;
