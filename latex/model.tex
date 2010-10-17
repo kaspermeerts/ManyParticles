@@ -5,8 +5,8 @@ The well-known \textbf{Maxwell-Boltzmann distribution} describes the molecular
 speed for a monoatomic classical ideal gas in thermodynamic equilibrium.
 
 $$
-f(v)\, \dif v = \left( \frac{\beta m}{2 \pi} \right)^{3/2} 4 \pi v^2 e^{-\beta 
-\frac{mv^2}{2}} \, \dif v
+f(v)\dif v = \left( \frac{\beta m}{2 \pi} \right)^{3/2} 4 \pi v^2 e^{-\beta 
+\frac{mv^2}{2}} \dif v
 $$
 where $\beta$ is given by
 \begin{math}
@@ -20,29 +20,46 @@ Consider a gas consisting of a single molecule of mass $m$ in a container in
 contact with a heat bath of temperature $T$. The probability of the particle 
 being in a state with energy $E$ is given by the Boltzmann distribution.
 $$
-P(E) \dif E \propto e^{-\beta E}\, \dif E
+P(E) \dif E \propto e^{-\beta E}\dif E
 $$
 Since the energy of particle is only a function of the velocity $\vec{v}$, $E = 
 \frac{mv^2}{2}$, we can deduce
 $$
-P(\vec v)\,\dif{\vec v} \propto e^{- \beta \frac{m |\vec v|^2}{2}}\,\dif\vec v
+P(\vec v)\dif{\vec v} \propto e^{- \beta \frac{m |\vec v|^2}{2}}\dif\vec v
 $$
 But we're interested in the speed distribution, not the velocity distribution.  
 For this, we use a substitution to polar coordinates
 $$
-\dif \vec{v} = \dif v_x\,\dif v_y = v\,\dif v\,\dif \theta
+\dif \vec{v} = \dif v_x\dif v_y = v\dif v\dif \theta
 $$
 where $v=|\vec{v}|$ is the speed. So
 $$
-f(v)\,\dif v\,\dif \theta \propto v\,e^{- \beta \frac{mv^2}{2}} \dif v\,\dif 
-\theta
+f(v)\dif v\dif \theta \propto ve^{- \beta \frac{mv^2}{2}} \dif v\dif \theta
 $$
 Since the distribution is independent of the parameter $\theta$, we can 
 integrate over it and remove it from the equation.
 $$
-f(v)\,\dif v\propto v\,e^{- \beta \frac{mv^2}{2}} \dif v
+f(v)\dif v\propto ve^{- \beta \frac{mv^2}{2}} \dif v
 $$
 After normalisation we find the \textbf{Rayleigh distribution}
 $$
-f(v)\,\dif v=\beta m v\,e^{-\beta \frac{mv^2}{2}} \dif v
+f(v)\dif v=\beta m ve^{-\beta \frac{mv^2}{2}} \dif v
+$$
+
+\subsection{Elastic collision}
+
+The most basic interaction that needs to be modeled in a many particle system 
+is the elastic collision between hard spheres or disks. Consider two particles 
+denoted by subscripts 1 and 2. Let $m_i$ be the masses, $v_c$ be the the 
+velocity of the center of mass (COM) frame, $v_i$ the velocities before the 
+collision, $v'_i$ the velocities before collision in the COM frame, $w_i$ the 
+velocities after the collision and $w'_i$ the velocities after collision in the 
+COM frame. We assume the speed of both bodies is non-relativistic.
+
+The one-dimensional results are well known
+$$
+v_c = \frac{m_1 v_1 + m_2 v_2}{m_1 + m_2}
+$$
+$$
+v_1 = \exp{c}
 $$
