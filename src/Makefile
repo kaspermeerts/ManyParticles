@@ -1,6 +1,6 @@
 OBJECTS = system.o
 WARNINGS = -pedantic -Wextra -Wall -Wwrite-strings -Wshadow -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
-CFLAGS = $(WARNINGS) -ansi -ggdb
+CFLAGS = $(WARNINGS) -ansi -march=native -O3
 
 
 all: main
