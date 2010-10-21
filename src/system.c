@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 #include "vmath.h"
 #include "system.h"
 
@@ -196,11 +197,9 @@ void densityDump(void)
 	int n = config.numBox / 2;
 	Particle **box = boxFromIndex(n, n, n);
 	Particle *p = *box;
-	Vec3 d;
 
 	if (p == NULL)
 		return;
-
 
 	for(i = 0; i < config.numParticles; i++)
 	{
@@ -208,7 +207,7 @@ void densityDump(void)
 		if (p == other)
 			continue;
 
-		sub(&p->pos, &other->pos, &d);
+		printf("%f\n", distance(&p->pos, &other->pos));
 	}
 
 	return;
@@ -224,12 +223,12 @@ void sanityCheck()
 		p1 = &world.parts[i];
 		for (j = i + 1; j < config.numParticles; j++)
 		{
-			Vec3 d;
+			float d;
 			p2 = &world.parts[j];
-			sub(&p1->pos, &p2->pos, &d);
-			if (length(&d) < p1->r + p2->r)
-				fprintf(stderr, "%f %f %f PROBLEM?\n", length(&d),
-						p1->r, p2->r);
+			d = distance(&p1->pos, &p2->pos);
+			if (d < p1->r + p2->r)
+				fprintf(stderr, "%f %f %f PROBLEM?\n", 
+						d, p1->r, p2->r);
 		}
 	}
 
@@ -251,8 +250,9 @@ int main(int argc, char **argv)
 	config.numParticles = atoi(argv[3]);
 	config.radius = atof(argv[4]);
 
-
 	stats.misses = 0;
+
+	srand(time(NULL));
 
 	fillWorld();
 
@@ -260,9 +260,7 @@ int main(int argc, char **argv)
 
 	densityDump();
 
-	sanityCheck();
-
-	printf("%d\n", stats.misses);
+	/*sanityCheck();*/
 
 	freeWorld();
 

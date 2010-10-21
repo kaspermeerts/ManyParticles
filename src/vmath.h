@@ -17,6 +17,8 @@ void scale(const Vec3 *v, float lambda, Vec3 *dest);
 float dot(const Vec3 *v, const Vec3 *w);
 float length2(const Vec3 *v);
 float length(const Vec3 *v);
+float distance2(const Vec3 *a, const Vec3 *b);
+float distance(const Vec3 *a, const Vec3 *b);
 
 void printVector(const Vec3 *v)
 {
@@ -58,4 +60,16 @@ float length(const Vec3 *v)
 	return sqrt(length2(v));
 }
 
+float distance2(const Vec3 *a, const Vec3 *b)
+{
+	Vec3 c;
+
+	sub(a, b, &c);
+	return length2(&c);
+}
+
+float distance(const Vec3 *a, const Vec3 *b)
+{
+	return sqrt(distance2(a, b));
+}
 #endif
