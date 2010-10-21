@@ -1,52 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <time.h>
 #include "vmath.h"
 #include "system.h"
-
-typedef struct particle
-{
-	Vec3 pos;
-	Vec3 vel;
-	float r;
-	struct particle *prev, *next;
-} Particle;
-
-typedef struct world
-{
-	Particle **grid;
-	Particle *parts;
-} World;
-
-typedef struct config
-{
-	/* The same for every dimension */
-	float boxSize;
-	int numBox;
-	int numParticles;
-	float radius;
-} Config;
-
-typedef struct stats
-{
-	int misses;
-} Stats;
-
-int main(int argc, char ** argv);
-bool collides(const Particle *p);
-Particle **boxFromParticle(const Particle *p);
-Particle **boxFromIndex(int nx, int ny, int nz);
-bool collideWith(const Particle *p, const Particle *ps);
-bool fillWorld(void);
-void freeWorld(void);
-void dumpWorld(void);
-void sanityCheck(void);
-void densityDump(void);
 
 World world;
 Config config;
 Stats stats;
+
 
 Particle **boxFromParticle(const Particle *p)
 {
@@ -59,10 +20,26 @@ Particle **boxFromParticle(const Particle *p)
 	return boxFromIndex(nx, ny, nz);
 }
 
-Particle **boxFromIndex(int nx, int ny, int nz)
+Particle **boxFromIndex(int ix, int iy, int iz)
 {
-	return world.grid + nx * config.numBox * config.numBox + 
-			ny * config.numBox + nz;
+	int nb = config.numBox;
+	
+	if (ix < 0)
+		ix += nb;
+	else if (ix >= nb)
+		ix -= nb;
+
+	if (iy < 0)
+		iy += nb;
+	else if (iy >= nb)
+		iy -= nb;
+
+	if (iz < 0)
+		iz += nb;
+	else if (iz >= nb)
+		iz -= nb;
+
+	return world.grid + ix*nb*nb + iy*nb + iz;
 }
 
 bool collides(const Particle *p)
@@ -83,10 +60,6 @@ bool collides(const Particle *p)
 	{
 		if (ix == 0 && iy == 0 && iz == 0)
 			continue;
-
-		if (nx + ix < 0 || nx + ix >= config.numBox) continue;
-		if (ny + iy < 0 || ny + iy >= config.numBox) continue;
-		if (nz + iz < 0 || nz + iz >= config.numBox) continue;
 
 		if (collideWith(p, *boxFromIndex(nx+ix, ny+iy, nz+iz)))
 			return true;
@@ -146,25 +119,23 @@ bool fillWorld()
 		do
 		{
 			stats.misses++;
-			ps[i].pos.x = rand() * worldSize / RAND_MAX;
-			ps[i].pos.y = rand() * worldSize / RAND_MAX;
-			ps[i].pos.z = rand() * worldSize / RAND_MAX;
+			/* To avoid hitting the exact boundary of the world
+			 * shift 32 bits to 23 bits, the precision of a float
+			 * mantissa */
+			ps[i].pos.x = (rand() >> 9) * worldSize / 
+					((RAND_MAX >> 9) + 1U);
+			ps[i].pos.y = (rand() >> 9) * worldSize /
+					((RAND_MAX >> 9) + 1U);
+			ps[i].pos.z = (rand() >> 9) * worldSize / 
+					((RAND_MAX >> 9) + 1U);
 		} while (collides(&ps[i]));
 
+		ps[i].vel.x = 1.0;
+		ps[i].vel.y = 0.0;
+		ps[i].vel.z = 0.0;
+
 		box = boxFromParticle(&ps[i]);
-		if (*box == NULL)
-		{
-			*box = &ps[i];
-			ps[i].prev = &ps[i];
-			ps[i].next = &ps[i];
-		} else
-		{
-			ps[i].next = *box;
-			ps[i].prev = (*box)->prev;
-			ps[i].prev->next = &ps[i];
-			ps[i].next->prev = &ps[i];
-			*box = &ps[i];
-		}
+		addToBox(&ps[i], box);
 	}
 
 	return true;
@@ -218,6 +189,8 @@ void sanityCheck()
 	int i, j;
 	const Particle *p1, *p2;
 
+	printf("Checking sanity\n");
+
 	for (i = 0; i < config.numParticles; i++)
 	{
 		p1 = &world.parts[i];
@@ -236,37 +209,72 @@ void sanityCheck()
 	return;
 }
 
-int main(int argc, char **argv)
+void stepWorld(void)
 {
+	Particle *p, *iterator;
+	Particle **origBox, **newBox;
+	float dt = config.timeStep;
+	int nb = config.numBox;
+	Vec3 dx;
+	int i;
 
-	if (argc < 5)
+	for (i = 0; i < nb*nb*nb; i++)
 	{
-		fprintf(stderr, "This needs 5 arguments\n");
-		return 1;
+		printf("%d\n", i);
+		origBox = &world.grid[i];
+		if (*origBox == NULL)
+			continue;
+
+		iterator = *origBox;
+		do
+		{
+			p = iterator;
+			
+			printVector(&p->pos);
+
+			scale(&p->vel, dt, &dx);
+			add(&p->pos, &dx, &p->pos);
+
+			printVector(&p->pos);
+
+			newBox = boxFromParticle(p);
+			if (newBox != origBox)
+				transferParticle(p, origBox, newBox);
+
+			p = next;
+		} while (p != *origBox);
 	}
 
-	config.boxSize = atof(argv[1]);
-	config.numBox = atoi(argv[2]);
-	config.numParticles = atoi(argv[3]);
-	config.radius = atof(argv[4]);
-
-	stats.misses = 0;
-
-	srand(time(NULL));
-
-	fillWorld();
-
-	/*dumpWorld();*/
-
-	densityDump();
-
-	/*sanityCheck();*/
-
-	freeWorld();
-
-	return 0;
+	return;
 }
 
+void transferParticle(Particle *p, Particle **from, Particle **to)
+{
+	if (p->prev == p)
+		*from = NULL;
+	else
+	{
+		p->prev->next = p->next;
+		p->next->prev = p->prev;
+	}
+	
+	addToBox(p, to);
 
+}
 
-
+void addToBox(Particle *p, Particle **box)
+{
+	if (*box == NULL)
+	{
+		*box = p;
+		p->prev = p;
+		p->next = p;
+	} else
+	{
+		p->next = *box;
+		p->prev = (*box)->prev;
+		p->prev->next = p;
+		p->next->prev = p;
+		*box = p;
+	}
+}
