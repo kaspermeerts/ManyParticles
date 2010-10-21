@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,7 +10,7 @@ Config config;
 Stats stats;
 
 
-Particle **boxFromParticle(const Particle *p)
+Box *boxFromParticle(const Particle *p)
 {
 	int nx, ny, nz;
 
@@ -20,7 +21,7 @@ Particle **boxFromParticle(const Particle *p)
 	return boxFromIndex(nx, ny, nz);
 }
 
-Particle **boxFromIndex(int ix, int iy, int iz)
+Box *boxFromIndex(int ix, int iy, int iz)
 {
 	int nb = config.numBox;
 	
@@ -44,6 +45,7 @@ Particle **boxFromIndex(int ix, int iy, int iz)
 
 bool collides(const Particle *p)
 {
+	Box *b;
 	int ix, iy, iz;
 	int nx, ny, nz;
 
@@ -51,7 +53,8 @@ bool collides(const Particle *p)
 	ny = p->pos.y / config.boxSize;
 	nz = p->pos.z / config.boxSize;
 
-	if (collideWith(p, *boxFromIndex(nx, ny, nz)))
+	b = boxFromIndex(nx, ny, nz);
+	if (collideWith(p, b->p))
 		return true;
 
 	for (ix = -1; ix <= 1; ix++)
@@ -61,7 +64,8 @@ bool collides(const Particle *p)
 		if (ix == 0 && iy == 0 && iz == 0)
 			continue;
 
-		if (collideWith(p, *boxFromIndex(nx+ix, ny+iy, nz+iz)))
+		b = boxFromIndex(nx+ix, ny+iy, nz+iz);
+		if (collideWith(p, b->p))
 			return true;
 	}
 
@@ -99,7 +103,7 @@ bool fillWorld()
 	int nb = config.numBox;
 	int i;
 	Particle *ps;
-	Particle **box;
+	Box *box;
 	float worldSize = config.numBox * config.boxSize;
 
 	world.parts = calloc(config.numParticles, sizeof(Particle));
@@ -166,8 +170,8 @@ void densityDump(void)
 {
 	int i;
 	int n = config.numBox / 2;
-	Particle **box = boxFromIndex(n, n, n);
-	Particle *p = *box;
+	Box *box = boxFromIndex(n, n, n);
+	Particle *p = box->p;
 
 	if (p == NULL)
 		return;
@@ -186,14 +190,15 @@ void densityDump(void)
 
 void sanityCheck()
 {
-	int i, j;
+	int i, j, nParts1, nParts2;
 	const Particle *p1, *p2;
-
-	printf("Checking sanity\n");
+	nParts1 = 0;
+	nParts2 = 0;
 
 	for (i = 0; i < config.numParticles; i++)
 	{
 		p1 = &world.parts[i];
+		/*
 		for (j = i + 1; j < config.numParticles; j++)
 		{
 			float d;
@@ -203,78 +208,161 @@ void sanityCheck()
 				fprintf(stderr, "%f %f %f PROBLEM?\n", 
 						d, p1->r, p2->r);
 		}
+		*/
+		if (p1->next->prev != p1 || p1->prev->next != p1)
+			fprintf(stderr, "%p is in a borked list\n", p1);
 	}
 
+	for (i = 0; i < config.numBox * config.numBox * config.numBox; i++)
+	{
+		Box *b = &world.grid[i];
+		const Particle *p, *first;
 
+		if (b->p == NULL)
+		{
+			if (b->n != 0)
+				fprintf(stderr, "Box %d: found zero, expected"
+						" %d\n", i, b->n);
+			continue;
+		}
+
+		first = b->p;
+		p = first;
+		j = 0;
+		do
+		{
+			Box *correctBox = boxFromParticle(p);
+			if (correctBox != b)
+			{
+				fprintf(stderr, "Particle is in box %d, should be in %d\n", i, (correctBox - world.grid)/sizeof(*correctBox));
+			}
+			j++;
+			nParts1++;
+			p = p->next;
+		} while (p != first);
+
+		if (j != b->n)
+		{
+			fprintf(stderr, "Box %d: found %d, expected %d\n", 
+					i, j, b->n);
+		}
+		nParts2 += b->n;
+	}
+
+	if (nParts1 != config.numParticles)
+	{
+		fprintf(stderr, "1: Found a total of %d particles, should be %d\n",
+				nParts1, config.numParticles);
+	}
+
+	if (nParts2 != config.numParticles)
+	{
+		fprintf(stderr, "2: Found a total of %d particles, should be %d\n",
+				nParts2, config.numParticles);
+	}
 	return;
 }
 
 void stepWorld(void)
 {
-	Particle *p, *iterator;
-	Particle **origBox, **newBox;
+	Particle *p, *next;
+	Box *origBox, *newBox;
 	float dt = config.timeStep;
+	float worldSize = config.numBox * config.boxSize;
 	int nb = config.numBox;
 	Vec3 dx;
-	int i;
+	int i, j;
 
 	for (i = 0; i < nb*nb*nb; i++)
 	{
-		printf("%d\n", i);
 		origBox = &world.grid[i];
-		if (*origBox == NULL)
-			continue;
 
-		iterator = *origBox;
-		do
+		p = origBox->p;
+		for (j = 0; j < origBox->n; j++)
 		{
-			p = iterator;
-			
-			printVector(&p->pos);
+			assert(p != NULL);
+			next = p->next;
 
 			scale(&p->vel, dt, &dx);
 			add(&p->pos, &dx, &p->pos);
 
-			printVector(&p->pos);
+			if (p->pos.x >= worldSize)
+				p->pos.x -= worldSize;
+			else if (p->pos.x < 0)
+				p->pos.x += worldSize;
+			
+			if (p->pos.y >= worldSize)
+				p->pos.y -= worldSize;
+			else if (p->pos.y < 0)
+				p->pos.y += worldSize;
+
+			if (p->pos.z >= worldSize)
+				p->pos.z -= worldSize;
+			else if (p->pos.z < 0)
+				p->pos.z += worldSize;
+
 
 			newBox = boxFromParticle(p);
+			
 			if (newBox != origBox)
-				transferParticle(p, origBox, newBox);
-
+			{
+				removeFromBox(p, origBox);
+				addToBox(p, newBox);
+			}
+			
 			p = next;
-		} while (p != *origBox);
+		}
 	}
 
 	return;
 }
 
-void transferParticle(Particle *p, Particle **from, Particle **to)
+void removeFromBox(Particle *p, Box *from)
 {
-	if (p->prev == p)
-		*from = NULL;
+	assert(p != NULL);
+	assert(from->n != 0);
+
+	if (from->n == 1)
+	{
+		assert(p->prev == p);
+		assert(p->next == p);
+		from->p = NULL;
+	}
 	else
 	{
+		assert(p->prev->next == p);
+		assert(p->next->prev == p);
 		p->prev->next = p->next;
 		p->next->prev = p->prev;
+
+		if (from->p == p)
+			from->p = p->next;
+
 	}
-	
-	addToBox(p, to);
+
+	p->prev = NULL;
+	p->next = NULL;
+
+	from->n--;
 
 }
 
-void addToBox(Particle *p, Particle **box)
+void addToBox(Particle *p, Box *b)
 {
-	if (*box == NULL)
+	if (b->p == NULL)
 	{
-		*box = p;
+		assert(b->n == 0);
+		b->p = p;
 		p->prev = p;
 		p->next = p;
 	} else
 	{
-		p->next = *box;
-		p->prev = (*box)->prev;
+		assert(b->n > 0);
+		p->next = b->p;
+		p->prev = b->p->prev;
 		p->prev->next = p;
 		p->next->prev = p;
-		*box = p;
 	}
+
+	b->n++;
 }

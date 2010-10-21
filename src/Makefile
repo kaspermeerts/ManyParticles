@@ -11,7 +11,7 @@ main: $(OBJECTS)
 	gcc -o main $(OBJECTS) -lm -lSDL -lGL -lGLU -ggdb
 
 .c.o:
-	gcc -o $@ $(CFLAGS) -c $<
+	gcc -o $@ $(CFLAGS) -c $< -DNDEBUG
 
 clean:
 	rm -f *.o

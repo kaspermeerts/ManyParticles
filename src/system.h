@@ -14,9 +14,15 @@ typedef struct particle
 	struct particle *prev, *next;
 } Particle;
 
+typedef struct box
+{
+	Particle *p;
+	int n;
+} Box;
+
 typedef struct world
 {
-	Particle **grid;
+	Box *grid;
 	Particle *parts;
 } World;
 
@@ -37,8 +43,8 @@ typedef struct stats
 
 int main(int argc, char ** argv);
 bool collides(const Particle *p);
-Particle **boxFromParticle(const Particle *p);
-Particle **boxFromIndex(int nx, int ny, int nz);
+Box *boxFromParticle(const Particle *p);
+Box *boxFromIndex(int nx, int ny, int nz);
 bool collideWith(const Particle *p, const Particle *ps);
 bool fillWorld(void);
 void freeWorld(void);
@@ -46,8 +52,8 @@ void dumpWorld(void);
 void sanityCheck(void);
 void densityDump(void);
 void stepWorld(void);
-void transferParticle(Particle *p, Particle **from, Particle **to);
-void addToBox(Particle *p, Particle **box);
+void addToBox(Particle *p, Box *b);
+void removeFromBox(Particle *p, Box *from);
 
 extern World world;
 extern Config config;

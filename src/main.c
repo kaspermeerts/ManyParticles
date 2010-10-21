@@ -6,33 +6,11 @@
 #include "system.h"
 #include "render.h"
 
-int main(int argc, char **argv)
+int mainLoop(void)
 {
 	SDL_Event event;
 
-	if (argc < 5)
-	{
-		fprintf(stderr, "This needs 5 arguments\n");
-		return 1;
-	}
-
-	config.boxSize = atof(argv[1]);
-	config.numBox = atoi(argv[2]);
-	config.numParticles = atoi(argv[3]);
-	config.radius = atof(argv[4]);
-	config.timeStep = 0.1;
-
-	stats.misses = 0;
-
-	srand(1);
-
-	fillWorld();
-
-	/*dumpWorld();*/
-
-	/*initRender();*/
-
-	while (0)
+	while (1)
 	{
 		while (SDL_PollEvent(&event))
 		{
@@ -52,8 +30,36 @@ int main(int argc, char **argv)
 		}
 
 		render();
-		/*stepWorld();*/
+		stepWorld();
+		/*sanityCheck();*/
 	}
+}
+
+int main(int argc, char **argv)
+{
+	if (argc < 5)
+	{
+		fprintf(stderr, "This needs 5 arguments\n");
+		return 1;
+	}
+
+	config.boxSize = atof(argv[1]);
+	config.numBox = atoi(argv[2]);
+	config.numParticles = atoi(argv[3]);
+	config.radius = atof(argv[4]);
+	config.timeStep = 0.01;
+
+	stats.misses = 0;
+
+	srand(time(NULL));
+
+	fillWorld();
+
+	/*dumpWorld();*/
+
+	initRender();
+
+	mainLoop();
 
 	stepWorld();
 

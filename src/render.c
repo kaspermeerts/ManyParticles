@@ -4,8 +4,8 @@
 #include "render.h"
 #include "system.h"
 
-#define SCREEN_W 1280
-#define SCREEN_H 800
+#define SCREEN_W 600
+#define SCREEN_H 600
 
 float theta = 0;
 SDL_Surface *surface;
@@ -44,7 +44,7 @@ int initRender(void)
 	if (surface == NULL)
 		die(SDL_GetError());
 
-	SDL_WM_ToggleFullScreen(surface);	
+	/*SDL_WM_ToggleFullScreen(surface);	*/
 
 	atexit(SDL_Quit);
 
@@ -71,7 +71,7 @@ int render(void)
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	theta += 0.51;
+	theta += 0.00;
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
