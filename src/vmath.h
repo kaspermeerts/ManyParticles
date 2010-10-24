@@ -9,12 +9,17 @@ typedef struct Vec3
 	float x, y, z;
 } Vec3;
 
+#ifndef M_PI
+#define M_PI	3.14159265358979323846
+#endif
+
 /* In header for inlining */
 
 static __inline__ void printVector(const Vec3 *v);
 static __inline__ void add(const Vec3 *a, const Vec3 *b, Vec3 *dest);
 static __inline__ void sub(const Vec3 *a, const Vec3 *b, Vec3 *dest);
 static __inline__ void scale(const Vec3 *v, float lambda, Vec3 *dest);
+static __inline__ void normalize(const Vec3 *v, Vec3 *w);
 static __inline__ float dot(const Vec3 *v, const Vec3 *w);
 static __inline__ float length2(const Vec3 *v);
 static __inline__ float length(const Vec3 *v);
@@ -45,6 +50,12 @@ static __inline__ void scale(const Vec3 *v, float lambda, Vec3 *dest)
 	dest->x = lambda * v->x;
 	dest->y = lambda * v->y;
 	dest->z = lambda * v->z;
+}
+
+static __inline__ void normalize(const Vec3 *v, Vec3 *w)
+{
+	float l = length(v);
+	scale(v, 1/l, w);
 }
 
 static __inline__ float dot(const Vec3 *v, const Vec3 *w)

@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -43,8 +44,9 @@ Box *boxFromIndex(int ix, int iy, int iz)
 	return world.grid + ix*nb*nb + iy*nb + iz;
 }
 
-bool collides(const Particle *p)
+Particle *collides(const Particle *p)
 {
+	Particle *other;
 	Box *b;
 	int ix, iy, iz;
 	int nx, ny, nz;
@@ -54,8 +56,9 @@ bool collides(const Particle *p)
 	nz = p->pos.z / config.boxSize;
 
 	b = boxFromIndex(nx, ny, nz);
-	if (collideWith(p, b->p))
-		return true;
+	other = collideWith(p, b->p);
+	if (other != NULL)
+		return other;
 
 	for (ix = -1; ix <= 1; ix++)
 	for (iy = -1; iy <= 1; iy++)
@@ -65,49 +68,104 @@ bool collides(const Particle *p)
 			continue;
 
 		b = boxFromIndex(nx+ix, ny+iy, nz+iz);
-		if (collideWith(p, b->p))
-			return true;
+		other = collideWith(p, b->p);
+		if (other != NULL)
+			return other;
 	}
 
-	return false;
+	return NULL;
 }
 
 /* p is the particle we're checking, ps is the first particle in the box */
-bool collideWith(const Particle *p, const Particle *ps)
+Particle *collideWith(const Particle *p, Particle *ps)
 {
-	const Particle *other = ps;
+	Particle *other = ps;
 	Vec3 diff;
 	
 	if (ps == NULL)
-		return false;
+		return NULL;
 
 	do
 	{
 		if (p == other)
+		{
+			other = other ->next;
 			continue;
+		}
 
 		sub(&p->pos, &other->pos, &diff);
 		if (length2(&diff) < (p->r + other->r)*(p->r + other->r))
-			return true;
+			return other;
 
 		other = other -> next;
 	} while (other != ps);
 
-	return false;
+	return NULL;
+}
+
+void handleCollision(Particle *p1, Particle *p2)
+{
+	Vec3 dv, dr, pos1, pos2, dx1, dx2, d;
+	Vec3 comv, comv1; /* Center Of Mass velocity */
+	Vec3 dv1, dv2; /* Change of velocity after collision */
+	float dvt1; 
+	/* difference of velocity in the direction of the tangent */
+	float dt, dt2, dummy;
+	float drsq, dvsq, dvdr, mindist;
+
+	/* First, backtrack the movements of the particle to the moment they
+	 * were just touching */
+	sub(&p1->pos, &p2->pos, &dr);
+	sub(&p1->vel, &p2->vel, &dv);
+
+	drsq = length2(&dr);
+	dvsq = length2(&dv); /* dv2 is the square of the velocity difference */
+	dvdr = dot(&dv, &dr);
+	mindist = p1->r + p2->r;
+
+	dummy = sqrt(dvdr*dvdr - dvsq*(drsq - mindist * mindist));
+	dt = (dvdr + dummy ) / dvsq;
+	dt2 = (dvdr - dummy ) / dvsq;
+
+	/*printf("%f %f\n", dt, dt2);*/
+
+/*	if (fabs(dt) > fabs(dt2))
+		dt = dt2;
+*/
+	
+	scale(&p1->vel, dt, &dx1);
+	add(&p1->pos, &dx1, &pos1);
+	scale(&p2->vel, dt, &dx2);
+	add(&p1->pos, &dx2, &pos2);
+
+	/* TODO Implement mass */
+	normalize(&dr, &d);
+	add(&p1->vel, &p2->vel, &comv);
+	scale(&comv, 0.5, &comv);
+	sub(&p1->vel, &comv, &comv1);
+	dvt1 = dot(&comv1, &d);
+	scale(&d, -2*dvt1, &dv1);
+	scale(&d, 2*dvt1, &dv2);
+
+	scale(&dv1, dt, &dx1);
+	scale(&dv2, dt, &dx2);
+
+	add(&p1->pos, &dx1, &p1->pos);
+	add(&p1->vel, &dv1, &p1->vel);
+
+	add(&p2->pos, &dx2, &p2->pos);
+	add(&p2->vel, &dv2, &p2->vel);
+
+	return;
 }
 
 /* Precondition: config MUST be valid
- * Allocates and fills */
-bool fillWorld()
+ * Allocates */
+bool allocWorld()
 {
 	int nb = config.numBox;
-	int i;
-	Particle *ps;
-	Box *box;
-	float worldSize = config.numBox * config.boxSize;
 
 	world.parts = calloc(config.numParticles, sizeof(Particle));
-	ps = world.parts;
 	if (world.parts == NULL)
 	{
 		MEM_ERROR(config.numParticles * sizeof(Particle));
@@ -115,32 +173,6 @@ bool fillWorld()
 	}
 
 	world.grid = calloc(nb * nb * nb, sizeof(*(world.grid)));
-
-	for (i = 0; i < config.numParticles; i++)
-	{
-		ps[i].r = config.radius;
-		stats.misses--;
-		do
-		{
-			stats.misses++;
-			/* To avoid hitting the exact boundary of the world
-			 * shift 32 bits to 23 bits, the precision of a float
-			 * mantissa */
-			ps[i].pos.x = (rand() >> 9) * worldSize / 
-					((RAND_MAX >> 9) + 1U);
-			ps[i].pos.y = (rand() >> 9) * worldSize /
-					((RAND_MAX >> 9) + 1U);
-			ps[i].pos.z = (rand() >> 9) * worldSize / 
-					((RAND_MAX >> 9) + 1U);
-		} while (collides(&ps[i]));
-
-		ps[i].vel.x = 1.0;
-		ps[i].vel.y = 0.0;
-		ps[i].vel.z = 0.0;
-
-		box = boxFromParticle(&ps[i]);
-		addToBox(&ps[i], box);
-	}
 
 	return true;
 }
@@ -188,100 +220,33 @@ void densityDump(void)
 	return;
 }
 
-void sanityCheck()
-{
-	int i, j, nParts1, nParts2;
-	const Particle *p1, *p2;
-	nParts1 = 0;
-	nParts2 = 0;
 
-	for (i = 0; i < config.numParticles; i++)
-	{
-		p1 = &world.parts[i];
-		/*
-		for (j = i + 1; j < config.numParticles; j++)
-		{
-			float d;
-			p2 = &world.parts[j];
-			d = distance(&p1->pos, &p2->pos);
-			if (d < p1->r + p2->r)
-				fprintf(stderr, "%f %f %f PROBLEM?\n", 
-						d, p1->r, p2->r);
-		}
-		*/
-		if (p1->next->prev != p1 || p1->prev->next != p1)
-			fprintf(stderr, "%p is in a borked list\n", p1);
-	}
-
-	for (i = 0; i < config.numBox * config.numBox * config.numBox; i++)
-	{
-		Box *b = &world.grid[i];
-		const Particle *p, *first;
-
-		if (b->p == NULL)
-		{
-			if (b->n != 0)
-				fprintf(stderr, "Box %d: found zero, expected"
-						" %d\n", i, b->n);
-			continue;
-		}
-
-		first = b->p;
-		p = first;
-		j = 0;
-		do
-		{
-			Box *correctBox = boxFromParticle(p);
-			if (correctBox != b)
-			{
-				fprintf(stderr, "Particle is in box %d, should be in %d\n", i, (correctBox - world.grid)/sizeof(*correctBox));
-			}
-			j++;
-			nParts1++;
-			p = p->next;
-		} while (p != first);
-
-		if (j != b->n)
-		{
-			fprintf(stderr, "Box %d: found %d, expected %d\n", 
-					i, j, b->n);
-		}
-		nParts2 += b->n;
-	}
-
-	if (nParts1 != config.numParticles)
-	{
-		fprintf(stderr, "1: Found a total of %d particles, should be %d\n",
-				nParts1, config.numParticles);
-	}
-
-	if (nParts2 != config.numParticles)
-	{
-		fprintf(stderr, "2: Found a total of %d particles, should be %d\n",
-				nParts2, config.numParticles);
-	}
-	return;
-}
 
 void stepWorld(void)
 {
-	Particle *p, *next;
 	Box *origBox, *newBox;
 	float dt = config.timeStep;
 	float worldSize = config.numBox * config.boxSize;
 	int nb = config.numBox;
-	Vec3 dx;
 	int i, j;
 
+	/* Advance each particle and if necessary, put them in the new box
+	 * where they belong */
 	for (i = 0; i < nb*nb*nb; i++)
 	{
+		Particle *p;
 		origBox = &world.grid[i];
 
 		p = origBox->p;
+		if (p == NULL)
+			continue;
+
 		for (j = 0; j < origBox->n; j++)
 		{
-			assert(p != NULL);
-			next = p->next;
+			/* Since p might be removed, we keep a pointer to 
+			 * its successor */
+			Particle *next = p->next;
+			Vec3 dx;
 
 			scale(&p->vel, dt, &dx);
 			add(&p->pos, &dx, &p->pos);
@@ -313,7 +278,23 @@ void stepWorld(void)
 			p = next;
 		}
 	}
+	
+	/* Second run, handle all collisions
+	 * XXX Does it make sense to do this in one run? */
+	for (i = 0; i < nb*nb*nb; i++)
+	{
+		Box *box = &world.grid[i];
+		Particle *p = box->p;
 
+		for (j = 0; j < box->n; j++)
+		{
+			Particle *p2 = collides(p);
+
+			if (p2) handleCollision(p, p2);
+			p = p->next;
+		}
+
+	}
 	return;
 }
 

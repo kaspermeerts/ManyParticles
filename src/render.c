@@ -7,14 +7,15 @@
 #define SCREEN_W 600
 #define SCREEN_H 600
 
-float theta = 0;
 SDL_Surface *surface;
 
+void renderSphere(float x, float y, float z, float r);
 void die(const char *msg);
 
 void die(const char *msg)
 {
 	fprintf(stderr, "%s\n", msg);
+	exit(1);
 }
 
 int initRender(void)
@@ -66,6 +67,7 @@ int render(void)
 {
 	int i;
 	float s;
+	static float theta;
 
 	s = config.numBox * config.boxSize;
 
@@ -76,7 +78,6 @@ int render(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0, 0, -s*2.5);
-	/*glTranslatef(-s/2, -s/2, -s/2);*/
 	glRotatef(theta, 0, 1, 1/2.);
 
 
@@ -95,17 +96,66 @@ int render(void)
 		glVertex3f(+s/2, +s/2, -s/2);
 	glEnd();
 
-	glColor3f(1.0, 0.5, 0.0);
+	glColor3f(0.0, 0.7, 0.0);
 	glPointSize(2);
-	glBegin(GL_POINTS);
+	/*glBegin(GL_POINTS);*/
 	for (i = 0; i < config.numParticles; i++)
 	{
 		Particle *p = &world.parts[i];
-		glVertex3f(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2);
+		renderSphere(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2, p->r);
+		/*glVertex3f(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2);*/
+		glColor3f(1.0, 0.0, 0.0);
 	}
-	glEnd();
+	/*glEnd();*/
 
 	SDL_GL_SwapBuffers();
 
 	return 0;
+}
+
+void renderSphere(float x, float y, float z, float r)
+{
+	const int stacks = 16;
+	const int slices = 32;
+	int i, j;
+
+	glBegin(GL_QUAD_STRIP);
+
+	for (i = 0; i < stacks; i++)
+	{
+		float theta1, theta2;
+		float r1, h1, r2, h2;
+
+		theta1 = M_PI * ((float) (i + 0) / stacks) - M_PI/2;
+		theta2 = M_PI * ((float) (i + 1) / stacks) - M_PI/2;
+
+		h1 = r * sin(theta1);
+		r1 = sqrt(r*r - h1*h1);
+
+		h2 = r * sin(theta2);
+		r2 = sqrt(r*r - h2*h2);
+
+		for (j = 0; j <= slices; j++)
+		{
+			float phi;
+			float x1, y1, z1, x2, y2, z2;
+
+			phi = 2 * M_PI * j / slices;
+
+			x1 = r1 * cos(phi);
+			y1 = r1 * sin(phi);
+			z1 = h1;
+
+			x2 = r2 * cos(phi);
+			y2 = r2 * sin(phi);
+			z2 = h2;
+
+			glVertex3f( x + x1, y + y1, z + z1);
+			glVertex3f( x + x2, y + y2, z + z2);
+		}
+	}
+
+	glEnd();
+
+	return;
 }

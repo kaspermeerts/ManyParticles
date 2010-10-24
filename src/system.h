@@ -39,25 +39,25 @@ typedef struct config
 typedef struct stats
 {
 	int misses;
+	float temperature;
 } Stats;
 
 int main(int argc, char ** argv);
-bool collides(const Particle *p);
+Particle *collides(const Particle *p);
+Particle *collideWith(const Particle *p, Particle *ps);
+void handleCollision(Particle *p1, Particle *p2);
 Box *boxFromParticle(const Particle *p);
 Box *boxFromIndex(int nx, int ny, int nz);
-bool collideWith(const Particle *p, const Particle *ps);
-bool fillWorld(void);
-void freeWorld(void);
-void dumpWorld(void);
-void sanityCheck(void);
-void densityDump(void);
-void stepWorld(void);
 void addToBox(Particle *p, Box *b);
 void removeFromBox(Particle *p, Box *from);
+bool allocWorld(void);
+void freeWorld(void);
+void dumpWorld(void);
+void densityDump(void);
+void stepWorld(void);
 
 extern World world;
 extern Config config;
 extern Stats stats;
-
 
 #endif
