@@ -94,7 +94,7 @@ Particle *collideWith(const Particle *p, Particle *ps)
 	{
 		if (p == other)
 		{
-			other = other ->next;
+			other = other->next;
 			continue;
 		}
 
@@ -102,7 +102,7 @@ Particle *collideWith(const Particle *p, Particle *ps)
 		if (length2(&diff) < (p->r + other->r)*(p->r + other->r))
 			return other;
 
-		other = other -> next;
+		other = other->next;
 	} while (other != ps);
 
 	return NULL;
@@ -114,8 +114,8 @@ void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 	Vec3 comv, comv1; /* Center Of Mass velocity */
 	Vec3 dv1, dv2; /* Change of velocity after collision */
 	float dvt1; 
-	/* difference of velocity in the direction of the tangent */
-	float dt, dt2, dummy;
+	/* Difference of velocity in the direction of the tangent */
+	float dt;
 	float drsq, dvsq, dvdr, mindist;
 
 	/* First, backtrack the movements of the particle to the moment they
@@ -124,20 +124,12 @@ void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 	sub(&p1->vel, &p2->vel, &dv);
 
 	drsq = length2(&dr);
-	dvsq = length2(&dv); /* dv2 is the square of the velocity difference */
+	dvsq = length2(&dv); /* Square of the velocity difference */
 	dvdr = dot(&dv, &dr);
 	mindist = p1->r + p2->r;
 
-	dummy = sqrt(dvdr*dvdr - dvsq*(drsq - mindist * mindist));
-	dt = (dvdr + dummy ) / dvsq;
-	dt2 = (dvdr - dummy ) / dvsq;
+	dt = (dvdr + sqrt(dvdr*dvdr + dvsq*(mindist * mindist - drsq))) / dvsq;
 
-	/*printf("%f %f\n", dt, dt2);*/
-
-/*	if (fabs(dt) > fabs(dt2))
-		dt = dt2;
-*/
-	
 	scale(&p1->vel, dt, &dx1);
 	add(&p1->pos, &dx1, &pos1);
 	scale(&p2->vel, dt, &dx2);
@@ -150,7 +142,7 @@ void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 	sub(&p1->vel, &comv, &comv1);
 	dvt1 = dot(&comv1, &d);
 	scale(&d, -2*dvt1, &dv1);
-	scale(&d, 2*dvt1, &dv2);
+	scale(&d,  2*dvt1, &dv2);
 
 	scale(&dv1, dt, &dx1);
 	scale(&dv2, dt, &dx2);
@@ -248,7 +240,8 @@ void stepWorld(void)
 		{
 			Particle *p2 = collides(p);
 
-			if (p2) handleCollision(p, p2);
+			if (p2 != NULL)
+				handleCollision(p, p2);
 			p = p->next;
 		}
 
@@ -317,8 +310,7 @@ void removeFromBox(Particle *p, Box *from)
 		assert(p->prev == p);
 		assert(p->next == p);
 		from->p = NULL;
-	}
-	else
+	} else
 	{
 		assert(p->prev->next == p);
 		assert(p->next->prev == p);
@@ -327,7 +319,6 @@ void removeFromBox(Particle *p, Box *from)
 
 		if (from->p == p)
 			from->p = p->next;
-
 	}
 
 	p->prev = NULL;
