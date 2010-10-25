@@ -1,15 +1,18 @@
 OBJECTS = system.o main.o render.o setup.o
 WARNINGS = -pedantic -Wextra -Wall -Wwrite-strings -Wshadow -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
+PROFILE = 
 OPTIM = -O0
-CFLAGS = $(WARNINGS) -ansi -march=native -ggdb $(OPTIM)
+CFLAGS = $(WARNINGS) -ansi -march=native -ggdb $(OPTIM) $(PROFILE)
 
 all: main
+profile:
+	make -B PROFILE="-pg -DNDEBUG"
 optim:
 	make -B OPTIM="-O3 -DNDEBUG"
 
 main: $(OBJECTS)
 	@echo "LD	main"
-	@gcc -o main $(OBJECTS) -lm -lSDL -lGL -lGLU -ggdb
+	@gcc -o main $(OBJECTS) -lm -lSDL -lGL -lGLU -ggdb $(PROFILE)
 
 .c.o:
 	@echo "CC	$@"

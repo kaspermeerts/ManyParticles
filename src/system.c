@@ -25,6 +25,7 @@ Box *boxFromIndex(int ix, int iy, int iz)
 {
 	int nb = config.numBox;
 	
+#if 0
 	if (ix < 0)
 		ix += nb;
 	else if (ix >= nb)
@@ -39,6 +40,11 @@ Box *boxFromIndex(int ix, int iy, int iz)
 		iz += nb;
 	else if (iz >= nb)
 		iz -= nb;
+#else
+	ix = ix & (nb - 1);
+	iy = iy & (nb - 1);
+	iz = iz & (nb - 1);
+#endif
 
 	return world.grid + ix*nb*nb + iy*nb + iz;
 }
@@ -102,7 +108,7 @@ Particle *collideWith(const Particle *p, Particle *ps)
 	return NULL;
 }
 
-void handleCollision(Particle *p1, Particle *p2)
+void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 {
 	Vec3 dv, dr, pos1, pos2, dx1, dx2, d;
 	Vec3 comv, comv1; /* Center Of Mass velocity */
