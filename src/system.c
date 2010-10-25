@@ -108,7 +108,7 @@ void handleCollision(Particle *p1, Particle *p2)
 	Vec3 comv, comv1; /* Center Of Mass velocity */
 	Vec3 dv1, dv2; /* Change of velocity after collision */
 	float dvt1; 
-	/* difference of velocity in the direction of the tangent */
+	/* Difference of velocity in the direction of the tangent */
 	float dt;
 	float drsq, dvsq, dvdr, mindist;
 
@@ -118,11 +118,11 @@ void handleCollision(Particle *p1, Particle *p2)
 	sub(&p1->vel, &p2->vel, &dv);
 
 	drsq = length2(&dr);
-	dvsq = length2(&dv); /* dv2 is the square of the velocity difference */
+	dvsq = length2(&dv); /* Square of the velocity difference */
 	dvdr = dot(&dv, &dr);
 	mindist = p1->r + p2->r;
 
-	dt = (dvdr + sqrt(dvdr*dvdr - dvsq*(drsq - mindist * mindist))) / dvsq;
+	dt = (dvdr + sqrt(dvdr*dvdr + dvsq*(mindist * mindist - drsq))) / dvsq;
 
 	scale(&p1->vel, dt, &dx1);
 	add(&p1->pos, &dx1, &pos1);
@@ -136,7 +136,7 @@ void handleCollision(Particle *p1, Particle *p2)
 	sub(&p1->vel, &comv, &comv1);
 	dvt1 = dot(&comv1, &d);
 	scale(&d, -2*dvt1, &dv1);
-	scale(&d, 2*dvt1, &dv2);
+	scale(&d,  2*dvt1, &dv2);
 
 	scale(&dv1, dt, &dx1);
 	scale(&dv2, dt, &dx2);
@@ -234,7 +234,8 @@ void stepWorld(void)
 		{
 			Particle *p2 = collides(p);
 
-			if (p2) handleCollision(p, p2);
+			if (p2 != NULL)
+				handleCollision(p, p2);
 			p = p->next;
 		}
 
@@ -303,8 +304,7 @@ void removeFromBox(Particle *p, Box *from)
 		assert(p->prev == p);
 		assert(p->next == p);
 		from->p = NULL;
-	}
-	else
+	} else
 	{
 		assert(p->prev->next == p);
 		assert(p->next->prev == p);
@@ -313,7 +313,6 @@ void removeFromBox(Particle *p, Box *from)
 
 		if (from->p == p)
 			from->p = p->next;
-
 	}
 
 	p->prev = NULL;
