@@ -5,7 +5,7 @@ CFLAGS = $(WARNINGS) -ansi -march=native -ggdb $(OPTIM)
 
 all: main
 optim:
-	make -B OPTIM="-O3"
+	make -B OPTIM="-O3 -DNDEBUG"
 
 main: $(OBJECTS)
 	@echo "LD	main"
@@ -13,7 +13,7 @@ main: $(OBJECTS)
 
 .c.o:
 	@echo "CC	$@"
-	@gcc -o $@ $(CFLAGS) -c $< -DNDEBUG
+	@gcc -o $@ $(CFLAGS) -c $<
 
 clean:
 	rm -f *.o

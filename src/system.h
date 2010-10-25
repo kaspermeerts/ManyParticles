@@ -32,14 +32,15 @@ typedef struct config
 	float boxSize;
 	int numBox;
 	int numParticles;
+	int iterations;
 	float radius;
 	float timeStep;
 } Config;
 
 typedef struct stats
 {
-	int misses;
 	float temperature;
+	float totKE;
 } Stats;
 
 int main(int argc, char ** argv);

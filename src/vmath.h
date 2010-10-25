@@ -28,7 +28,7 @@ static __inline__ float distance(const Vec3 *a, const Vec3 *b);
 
 static __inline__ void printVector(const Vec3 *v)
 {
-	printf("%10f\t%10f\t%10f\n", v->x, v->y, v->z);
+	printf("%10f\t%10f\t%10f\t", v->x, v->y, v->z);
 }
 
 static __inline__ void add(const Vec3 *a, const Vec3 *b, Vec3 *dest)

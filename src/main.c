@@ -1,7 +1,11 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <SDL/SDL.h>
+#include <unistd.h>
+#include "main.h"
 #include "vmath.h"
 #include "system.h"
 #include "render.h"
@@ -9,6 +13,7 @@
 
 void sanityCheck(void);
 int renderLoop(void);
+void parseArguments(int argc, char **argv);
 
 int renderLoop(void)
 {
@@ -71,7 +76,7 @@ void sanityCheck()
 					(const void *) p1);
 	}
 
-	printf("%f\n", totKE);
+	/*printf("%f\n", totKE);*/
 
 	/* Check if each particle is in the box it should be in given it's
 	 * coordinates and count the number of particles and check them with
@@ -128,25 +133,76 @@ void sanityCheck()
 	return;
 }
 
+void parseArguments(int argc, char **argv)
+{
+	int c;
+
+	/* Sane defaults */
+	config.iterations = 100;
+	config.timeStep = 0.01;
+
+
+	while ((c = getopt(argc, argv, ":i:t:")) != -1)
+	{
+		switch (c)
+		{
+		case 'i':
+			config.iterations = atoi(optarg);
+			if (config.iterations < 0)
+				die("Invalid number of iterations %d\n",
+						config.iterations);
+			break;
+		case 't':
+			config.timeStep = atof(optarg);
+			if (config.timeStep <= 0)
+				die("Invalid timestep %f\n", config.timeStep);
+			break;
+		case ':':
+			die("Option -%c requires an argument\n", optopt);
+			break;
+		case '?':
+			die("Option -%c not recognized\n", optopt);
+			break;
+		default:
+			/* XXX */
+			break;
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+
+	if (argc < 4)
+		die("Usage: main <box size> <box number> <particle number> "
+					"<radius>\n"
+		    "            [-t timestep] [-i iterations] [-s setup]\n");
+
+	config.boxSize = atof(argv[0]);
+	config.numBox = atoi(argv[1]);
+	config.numParticles = atoi(argv[2]);
+	config.radius = atof(argv[3]);
+
+	return;
+}
+
+void die(const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	vfprintf(stderr, fmt, args);
+	va_end(args);
+
+	exit(1);
+	return;
+}
+
 int main(int argc, char **argv)
 {
 	bool rendering = false;
-	int iterations, i;
+	int i;
 
-	if (argc < 6)
-	{
-		fprintf(stderr, "This needs 5 arguments\n");
-		return 1;
-	}
-
-	config.boxSize = atof(argv[1]);
-	config.numBox = atoi(argv[2]);
-	config.numParticles = atoi(argv[3]);
-	config.radius = atof(argv[4]);
-	iterations = atoi(argv[5]);
-	config.timeStep = 0.01;
-
-	stats.misses = 0;
+	parseArguments(argc, argv);
 
 	srand(time(NULL));
 
@@ -159,9 +215,10 @@ int main(int argc, char **argv)
 		renderLoop();
 	}
 	else
-		for (i = 0; i < iterations; i++)
+		for (i = 0; i < config.iterations; i++)
 			stepWorld();
 
+	dumpWorld();
 	sanityCheck();
 	freeWorld();
 

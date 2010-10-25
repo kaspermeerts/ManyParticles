@@ -14,10 +14,8 @@ void fillWorld(void)
 	for (i = 0; i < config.numParticles; i++)
 	{
 		ps[i].r = config.radius;
-		stats.misses--;
 		do
 		{
-			stats.misses++;
 			/* To avoid hitting the exact boundary of the world
 			 * shift 32 bits to 23 bits, the precision of a float
 			 * mantissa */
@@ -44,7 +42,7 @@ void fillWorld(void)
 		addToBox(&ps[i], box);
 	}
 
-	printf("%f\n", totKE);
+	stats.totKE = totKE;
 /*
 	ps[0].pos.x = 0.2;
 	ps[0].pos.y = 0.5;

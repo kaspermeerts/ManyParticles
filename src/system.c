@@ -10,7 +10,6 @@ World world;
 Config config;
 Stats stats;
 
-
 Box *boxFromParticle(const Particle *p)
 {
 	int nx, ny, nz;
@@ -192,7 +191,10 @@ void dumpWorld()
 	for (i = 0; i < config.numParticles; i++)
 	{
 		const Particle *p = &world.parts[i];
+		printf("%d\t", i);
 		printVector(&p->pos);
+		printVector(&p->vel);
+		printf("\n");
 	}
 
 	return;
@@ -229,6 +231,22 @@ void stepWorld(void)
 	float worldSize = config.numBox * config.boxSize;
 	int nb = config.numBox;
 	int i, j;
+
+	/* XXX Does it make sense to do this in one run? */
+	for (i = 0; i < nb*nb*nb; i++)
+	{
+		Box *box = &world.grid[i];
+		Particle *p = box->p;
+
+		for (j = 0; j < box->n; j++)
+		{
+			Particle *p2 = collides(p);
+
+			if (p2) handleCollision(p, p2);
+			p = p->next;
+		}
+
+	}
 
 	/* Advance each particle and if necessary, put them in the new box
 	 * where they belong */
@@ -279,22 +297,7 @@ void stepWorld(void)
 		}
 	}
 	
-	/* Second run, handle all collisions
-	 * XXX Does it make sense to do this in one run? */
-	for (i = 0; i < nb*nb*nb; i++)
-	{
-		Box *box = &world.grid[i];
-		Particle *p = box->p;
 
-		for (j = 0; j < box->n; j++)
-		{
-			Particle *p2 = collides(p);
-
-			if (p2) handleCollision(p, p2);
-			p = p->next;
-		}
-
-	}
 	return;
 }
 

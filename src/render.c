@@ -1,6 +1,7 @@
 #include <SDL/SDL.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include "main.h"
 #include "render.h"
 #include "system.h"
 
@@ -10,13 +11,6 @@
 SDL_Surface *surface;
 
 void renderSphere(float x, float y, float z, float r);
-void die(const char *msg);
-
-void die(const char *msg)
-{
-	fprintf(stderr, "%s\n", msg);
-	exit(1);
-}
 
 int initRender(void)
 {
