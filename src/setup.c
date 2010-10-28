@@ -7,9 +7,21 @@ void fillWorld(void)
 	Box *box;
 	int i;
 	Particle *ps = world.parts;
-	float totKE = 0; /* Total kinetic energy */
 	float v, u, phi;
 	float worldSize = config.numBox * config.boxSize;
+
+#ifdef BROWNIAN
+	huge.pos.x = worldSize / 2;
+	huge.pos.y = worldSize / 2;
+	huge.pos.z = worldSize / 2;
+
+	huge.vel.x = 0;
+	huge.vel.y = 0;
+	huge.vel.z = 0;
+
+	huge.r = config.radius * 10;
+	config.massHuge = 500;
+#endif
 
 	for (i = 0; i < config.numParticles; i++)
 	{
@@ -30,26 +42,23 @@ void fillWorld(void)
 		/* Sphere surface point picking is trickier than might seem */
 		phi = 2 * M_PI * rand() / (double) (RAND_MAX + 1U);
 		u = rand() / (RAND_MAX / 2.) - 1;
-		v = rand() / (RAND_MAX / 1.);
+		v = 1; /*rand() / (RAND_MAX / 1.);*/
 
 		ps[i].vel.x = v * sqrt(1-u*u) * cos(phi);
 		ps[i].vel.y = v * sqrt(1-u*u) * sin(phi);
 		ps[i].vel.z = v * u;
 
-		totKE += v*v/2;
-
 		box = boxFromParticle(&ps[i]);
 		addToBox(&ps[i], box);
 	}
-
-	stats.totKE = totKE;
-/*
+	
+	/*
 	ps[0].pos.x = 0.2;
 	ps[0].pos.y = 0.5;
 	ps[0].pos.z = 0.5;
 
 	ps[0].vel.x = 0.20;
-	ps[0].vel.y = 0.0;
+	ps[0].vel.y = 0.05;
 	ps[0].vel.z = 0.0;
 
 	ps[1].pos.x = 0.8;
@@ -59,5 +68,5 @@ void fillWorld(void)
 	ps[1].vel.x = 0.00;
 	ps[1].vel.y = 0.0;
 	ps[1].vel.z = 0.0;
-*/
+	*/
 }	

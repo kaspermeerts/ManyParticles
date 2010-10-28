@@ -28,6 +28,8 @@ typedef struct world
 
 typedef struct config
 {
+	bool render;
+
 	/* The same for every dimension */
 	float boxSize;
 	int numBox;
@@ -35,18 +37,18 @@ typedef struct config
 	int iterations;
 	float radius;
 	float timeStep;
+#ifdef BROWNIAN
+	float massHuge;
+#endif
 } Config;
-
-typedef struct stats
-{
-	float temperature;
-	float totKE;
-} Stats;
 
 int main(int argc, char ** argv);
 Particle *collides(const Particle *p);
 Particle *collideWith(const Particle *p, Particle *ps);
 void handleCollision(Particle *p1, Particle *p2);
+#ifdef BROWNIAN
+void handleCollisionHuge(Particle *p);
+#endif
 Box *boxFromParticle(const Particle *p);
 Box *boxFromIndex(int nx, int ny, int nz);
 void addToBox(Particle *p, Box *b);
@@ -59,6 +61,8 @@ void stepWorld(void);
 
 extern World world;
 extern Config config;
-extern Stats stats;
+#ifdef BROWNIAN
+extern Particle huge;
+#endif
 
 #endif

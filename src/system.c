@@ -8,7 +8,9 @@
 
 World world;
 Config config;
-Stats stats;
+#ifdef BROWNIAN
+Particle huge;
+#endif
 
 Box *boxFromParticle(const Particle *p)
 {
@@ -25,7 +27,7 @@ Box *boxFromIndex(int ix, int iy, int iz)
 {
 	int nb = config.numBox;
 	
-#if 0
+#if 1
 	if (ix < 0)
 		ix += nb;
 	else if (ix >= nb)
@@ -55,6 +57,13 @@ Particle *collides(const Particle *p)
 	Box *b;
 	int ix, iy, iz;
 	int nx, ny, nz;
+
+#ifdef BROWNIAN
+	Vec3 dhuge;
+	sub(&p->pos, &huge.pos, &dhuge);
+	if (length2(&dhuge) < p->r * p->r + huge.r * huge.r)
+		return &huge;
+#endif
 
 	nx = p->pos.x / config.boxSize;
 	ny = p->pos.y / config.boxSize;
@@ -108,9 +117,61 @@ Particle *collideWith(const Particle *p, Particle *ps)
 	return NULL;
 }
 
+#ifdef BROWNIAN
+void handleCollisionHuge(Particle *p)
+{
+	Vec3 phuge;
+	Vec3 dv, dr, dx1, dx2, d;
+	Vec3 comv, comv1; /* Center Of Mass velocity */
+	Vec3 dv1, dv2; /* Change of velocity after collision */
+	float dvt1; 
+	/* Difference of velocity in the direction of the tangent */
+	float dt;
+	float drsq, dvsq, dvdr, mindist;
+
+	/* First, backtrack the movements of the particle to the moment they
+	 * were just touching */
+	sub(&p->pos, &huge.pos, &dr);
+	sub(&p->vel, &huge.vel, &dv);
+
+	drsq = length2(&dr);
+	dvsq = length2(&dv); /* Square of the velocity difference */
+	dvdr = dot(&dv, &dr);
+	mindist = p->r + huge.r;
+
+	dt = (dvdr + sqrt(dvdr*dvdr + dvsq*(mindist * mindist - drsq))) / dvsq;
+
+	scale(&p->vel, -dt, &dx1);
+	scale(&huge.vel, -dt, &dx2);
+
+	add(&p->pos, &dx1, &p->pos);
+	add(&huge.pos, &dx2, &huge.pos);
+
+	normalize(&dr, &d);
+	scale(&huge.vel, config.massHuge, &phuge);
+	add(&p->vel, &phuge, &comv);
+	scale(&comv, 1.0/(1 + config.massHuge), &comv);
+	sub(&p->vel, &comv, &comv1);
+	dvt1 = dot(&comv1, &d);
+	scale(&d, -2*dvt1, &dv1);
+	scale(&d,  2*dvt1/config.massHuge, &dv2);
+
+	scale(&dv1, dt, &dx1);
+	scale(&dv2, dt, &dx2);
+
+	add(&p->pos, &dx1, &p->pos);
+	add(&p->vel, &dv1, &p->vel);
+
+	add(&huge.pos, &dx2, &huge.pos);
+	add(&huge.vel, &dv2, &huge.vel);
+
+	return;
+}
+#endif
+
 void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 {
-	Vec3 dv, dr, pos1, pos2, dx1, dx2, d;
+	Vec3 dv, dr, dx1, dx2, d;
 	Vec3 comv, comv1; /* Center Of Mass velocity */
 	Vec3 dv1, dv2; /* Change of velocity after collision */
 	float dvt1; 
@@ -130,12 +191,12 @@ void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 
 	dt = (dvdr + sqrt(dvdr*dvdr + dvsq*(mindist * mindist - drsq))) / dvsq;
 
-	scale(&p1->vel, dt, &dx1);
-	add(&p1->pos, &dx1, &pos1);
-	scale(&p2->vel, dt, &dx2);
-	add(&p1->pos, &dx2, &pos2);
+	scale(&p1->vel, -dt, &dx1);
+	scale(&p2->vel, -dt, &dx2);
 
-	/* TODO Implement mass */
+	add(&p1->pos, &dx1, &p1->pos);
+	add(&p2->pos, &dx2, &p2->pos);
+
 	normalize(&dr, &d);
 	add(&p1->vel, &p2->vel, &comv);
 	scale(&comv, 0.5, &comv);
@@ -239,7 +300,11 @@ void stepWorld(void)
 		for (j = 0; j < box->n; j++)
 		{
 			Particle *p2 = collides(p);
-
+#ifdef BROWNIAN
+			if (p2 == &huge)
+				handleCollisionHuge(p);
+			else
+#endif
 			if (p2 != NULL)
 				handleCollision(p, p2);
 			p = p->next;

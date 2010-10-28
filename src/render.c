@@ -5,11 +5,15 @@
 #include "render.h"
 #include "system.h"
 
-#define SCREEN_W 600
-#define SCREEN_H 600
+#define SCREEN_W 1280
+#define SCREEN_H 800
 
 SDL_Surface *surface;
 
+GLfloat light_pos[] = {  3.0, 1.0, 0.0, 0.0 };
+GLfloat light_diff[] = { 1.0, 1.0, 1.0, 0.0 };
+GLfloat light_spec[] = { 1.0, 0.0, 0.0, 1.0 };
+GLfloat light_ambi[] = { 1.0, 1.0, 1.0, 1.0 };
 void renderSphere(float x, float y, float z, float r);
 
 int initRender(void)
@@ -44,6 +48,14 @@ int initRender(void)
 	atexit(SDL_Quit);
 
 	/* OpenGL Init */
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	glLightfv( GL_LIGHT0, GL_POSITION, light_pos );
+	glLightfv( GL_LIGHT0, GL_DIFFUSE, light_diff );
+	glLightfv( GL_LIGHT0, GL_SPECULAR, light_spec );
+	glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambi );
 
 	glClearColor(0.0, 0.0, 0.2, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -65,14 +77,14 @@ int render(void)
 
 	s = config.numBox * config.boxSize;
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	theta += 0.00;
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0, 0, -s*2.5);
-	glRotatef(theta, 0, 1, 1/2.);
+	glRotatef(theta, 0, 1, 0);
 
 
 	glColor3f(0.0, 1.0, 0.0);
@@ -90,8 +102,11 @@ int render(void)
 		glVertex3f(+s/2, +s/2, -s/2);
 	glEnd();
 
+#ifdef BROWNIAN
+	renderSphere(huge.pos.x - s/2, huge.pos.y - s/2, huge.pos.z - s/2, huge.r);
+#endif
 	glColor3f(0.0, 0.7, 0.0);
-	glPointSize(2);
+	/*glPointSize(2);*/
 	/*glBegin(GL_POINTS);*/
 	for (i = 0; i < config.numParticles; i++)
 	{
@@ -109,8 +124,8 @@ int render(void)
 
 void renderSphere(float x, float y, float z, float r)
 {
-	const int stacks = 16;
-	const int slices = 32;
+	const int stacks = 8;
+	const int slices = 8;
 	int i, j;
 
 	glBegin(GL_QUAD_STRIP);
@@ -144,8 +159,10 @@ void renderSphere(float x, float y, float z, float r)
 			y2 = r2 * sin(phi);
 			z2 = h2;
 
-			glVertex3f( x + x1, y + y1, z + z1);
-			glVertex3f( x + x2, y + y2, z + z2);
+			glVertex3f(x + x1, y + y1, z + z1);
+			glNormal3f(x1, y1, z1); 
+			glVertex3f(x + x2, y + y2, z + z2);
+			glNormal3f(x2, y2, z2);
 		}
 	}
 

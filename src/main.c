@@ -14,6 +14,7 @@
 void sanityCheck(void);
 int renderLoop(void);
 void parseArguments(int argc, char **argv);
+void printStats(void);
 
 int renderLoop(void)
 {
@@ -43,11 +44,35 @@ int renderLoop(void)
 	}
 }
 
+void printStats()
+{
+	int i;
+	const Particle *p;
+	float totKE = 0;
+	float v2;
+	Vec3 totP = {0, 0, 0};
+
+	for (i = 0; i < config.numParticles; i++)
+	{
+		p = &world.parts[i];
+		v2 = length2(&p->vel);
+		totKE += v2/2;
+		add(&totP, &p->vel, &totP);
+	}
+
+	printf("P: ");
+	printVector(&totP);
+	printf(" E: %f\n", totKE);
+
+	return;
+}
+
 void sanityCheck()
 {
 	int i, j, nParts1, nParts2;
 	const Particle *p1;
 	float totKE = 0;
+	Vec3 totP = {0, 0, 0};
 	nParts1 = 0;
 	nParts2 = 0;
 
@@ -59,6 +84,7 @@ void sanityCheck()
 		p1 = &world.parts[i];
 		v2 = dot(&p1->vel, &p1->vel);
 		totKE += v2/2;
+		add(&totP, &p1->vel, &totP);
 		/*
 		for (j = i + 1; j < config.numParticles; j++)
 		{
@@ -75,8 +101,6 @@ void sanityCheck()
 			fprintf(stderr, "%p is in a borked list\n",
 					(const void *) p1);
 	}
-
-	/*printf("%f\n", totKE);*/
 
 	/* Check if each particle is in the box it should be in given it's
 	 * coordinates and count the number of particles and check them with
@@ -142,7 +166,7 @@ void parseArguments(int argc, char **argv)
 	config.timeStep = 0.01;
 
 
-	while ((c = getopt(argc, argv, ":i:t:")) != -1)
+	while ((c = getopt(argc, argv, ":i:t:r")) != -1)
 	{
 		switch (c)
 		{
@@ -156,6 +180,9 @@ void parseArguments(int argc, char **argv)
 			config.timeStep = atof(optarg);
 			if (config.timeStep <= 0)
 				die("Invalid timestep %f\n", config.timeStep);
+			break;
+		case 'r':
+			config.render = true;
 			break;
 		case ':':
 			die("Option -%c requires an argument\n", optopt);
@@ -199,7 +226,6 @@ void die(const char *fmt, ...)
 
 int main(int argc, char **argv)
 {
-	bool rendering = false;
 	int i;
 
 	parseArguments(argc, argv);
@@ -208,18 +234,27 @@ int main(int argc, char **argv)
 
 	allocWorld();
 	fillWorld();
+	/*printStats();*/
 	
-	if (rendering)
+	if (config.render)
 	{
 		initRender();
 		renderLoop();
 	}
 	else
 		for (i = 0; i < config.iterations; i++)
+		{
+#ifdef BROWNIAN
+			printVector(&huge.pos);
+			printf("\n");
+#endif
 			stepWorld();
-
-	dumpWorld();
+		}
+	
+	/*printStats();*/
 	sanityCheck();
+
+	/*dumpWorld();*/
 	freeWorld();
 
 	return 0;
