@@ -1,0 +1,2 @@
+./main 10 32 10000 0.5 -i 10000 -t 0.1
+met huge.r 20 * radius, mass 1, speed was 5

@@ -11,7 +11,7 @@ profile:
 optim:
 	make -B OPTIM="-O3 -DNDEBUG"
 brown:
-	make -B BROWN="-DBROWNIAN"
+	make -B BROWN="-DBROWNIAN -O3 -DNDEBUG"
 
 main: $(OBJECTS)
 	@echo "LD	main"

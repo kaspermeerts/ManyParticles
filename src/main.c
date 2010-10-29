@@ -245,8 +245,11 @@ int main(int argc, char **argv)
 		for (i = 0; i < config.iterations; i++)
 		{
 #ifdef BROWNIAN
-			printVector(&huge.pos);
-			printf("\n");
+			if (i%10 == 0)
+			{
+				printVector(&huge.pos);
+				printf("\n");
+			}
 #endif
 			stepWorld();
 		}
@@ -254,7 +257,9 @@ int main(int argc, char **argv)
 	/*printStats();*/
 	sanityCheck();
 
-	/*dumpWorld();*/
+#ifndef BROWNIAN
+	dumpWorld();
+#endif
 	freeWorld();
 
 	return 0;

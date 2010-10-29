@@ -19,13 +19,12 @@ void fillWorld(void)
 	huge.vel.y = 0;
 	huge.vel.z = 0;
 
-	huge.r = config.radius * 10;
-	config.massHuge = 500;
+	config.radiusHuge = config.radius * 20;
+	config.massHuge = 1;
 #endif
 
 	for (i = 0; i < config.numParticles; i++)
 	{
-		ps[i].r = config.radius;
 		do
 		{
 			/* To avoid hitting the exact boundary of the world

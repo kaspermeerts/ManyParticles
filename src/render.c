@@ -10,7 +10,7 @@
 
 SDL_Surface *surface;
 
-GLfloat light_pos[] = {  3.0, 1.0, 0.0, 0.0 };
+GLfloat light_pos[] = {  3.0, 1.0, 1.0, 0.0 };
 GLfloat light_diff[] = { 1.0, 1.0, 1.0, 0.0 };
 GLfloat light_spec[] = { 1.0, 0.0, 0.0, 1.0 };
 GLfloat light_ambi[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -79,7 +79,7 @@ int render(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	theta += 0.00;
+	theta += 0.20;
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -103,7 +103,8 @@ int render(void)
 	glEnd();
 
 #ifdef BROWNIAN
-	renderSphere(huge.pos.x - s/2, huge.pos.y - s/2, huge.pos.z - s/2, huge.r);
+	renderSphere(huge.pos.x - s/2, huge.pos.y - s/2, huge.pos.z - s/2,
+			config.radiusHuge);
 #endif
 	glColor3f(0.0, 0.7, 0.0);
 	/*glPointSize(2);*/
@@ -111,7 +112,8 @@ int render(void)
 	for (i = 0; i < config.numParticles; i++)
 	{
 		Particle *p = &world.parts[i];
-		renderSphere(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2, p->r);
+		renderSphere(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2, 
+				config.radius);
 		/*glVertex3f(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2);*/
 		glColor3f(1.0, 0.0, 0.0);
 	}

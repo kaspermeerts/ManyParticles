@@ -10,7 +10,6 @@ typedef struct particle
 {
 	Vec3 pos;
 	Vec3 vel;
-	float r;
 	struct particle *prev, *next;
 } Particle;
 
@@ -38,6 +37,7 @@ typedef struct config
 	float radius;
 	float timeStep;
 #ifdef BROWNIAN
+	float radiusHuge;
 	float massHuge;
 #endif
 } Config;
@@ -45,6 +45,7 @@ typedef struct config
 int main(int argc, char ** argv);
 Particle *collides(const Particle *p);
 Particle *collideWith(const Particle *p, Particle *ps);
+void collideWalls(int ix, int iy, int iz);
 void handleCollision(Particle *p1, Particle *p2);
 #ifdef BROWNIAN
 void handleCollisionHuge(Particle *p);

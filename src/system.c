@@ -27,26 +27,20 @@ Box *boxFromIndex(int ix, int iy, int iz)
 {
 	int nb = config.numBox;
 	
-#if 1
 	if (ix < 0)
-		ix += nb;
+		ix = 0;
 	else if (ix >= nb)
-		ix -= nb;
+		ix = nb - 1;
 
 	if (iy < 0)
-		iy += nb;
+		iy = 0;
 	else if (iy >= nb)
-		iy -= nb;
+		iy = nb - 1;
 
 	if (iz < 0)
-		iz += nb;
+		iz = 0;
 	else if (iz >= nb)
-		iz -= nb;
-#else
-	ix = ix & (nb - 1);
-	iy = iy & (nb - 1);
-	iz = iz & (nb - 1);
-#endif
+		iz = nb - 1;
 
 	return world.grid + ix*nb*nb + iy*nb + iz;
 }
@@ -59,9 +53,10 @@ Particle *collides(const Particle *p)
 	int nx, ny, nz;
 
 #ifdef BROWNIAN
+	const float d = config.radius + config.radiusHuge;
 	Vec3 dhuge;
 	sub(&p->pos, &huge.pos, &dhuge);
-	if (length2(&dhuge) < p->r * p->r + huge.r * huge.r)
+	if (length2(&dhuge) < d*d)
 		return &huge;
 #endif
 
@@ -95,6 +90,7 @@ Particle *collideWith(const Particle *p, Particle *ps)
 {
 	Particle *other = ps;
 	Vec3 diff;
+	const float r = config.radius;
 	
 	if (ps == NULL)
 		return NULL;
@@ -108,7 +104,7 @@ Particle *collideWith(const Particle *p, Particle *ps)
 		}
 
 		sub(&p->pos, &other->pos, &diff);
-		if (length2(&diff) < (p->r + other->r)*(p->r + other->r))
+		if (length2(&diff) < 4*r*r)
 			return other;
 
 		other = other->next;
@@ -137,7 +133,7 @@ void handleCollisionHuge(Particle *p)
 	drsq = length2(&dr);
 	dvsq = length2(&dv); /* Square of the velocity difference */
 	dvdr = dot(&dv, &dr);
-	mindist = p->r + huge.r;
+	mindist = config.radius + config.radiusHuge;
 
 	dt = (dvdr + sqrt(dvdr*dvdr + dvsq*(mindist * mindist - drsq))) / dvsq;
 
@@ -178,6 +174,7 @@ void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 	/* Difference of velocity in the direction of the tangent */
 	float dt;
 	float drsq, dvsq, dvdr, mindist;
+	const float r = config.radius;
 
 	/* First, backtrack the movements of the particle to the moment they
 	 * were just touching */
@@ -187,7 +184,7 @@ void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 	drsq = length2(&dr);
 	dvsq = length2(&dv); /* Square of the velocity difference */
 	dvdr = dot(&dv, &dr);
-	mindist = p1->r + p2->r;
+	mindist = 2*r;
 
 	dt = (dvdr + sqrt(dvdr*dvdr + dvsq*(mindist * mindist - drsq))) / dvsq;
 
@@ -281,13 +278,55 @@ void densityDump(void)
 	return;
 }
 
+void collideWalls(int ix, int iy, int iz)
+{
+	int i;
+	int nb = config.numBox;
+	Particle *p;
+	Box *b = boxFromIndex(ix, iy, iz);
+	float worldSize = config.boxSize * config.numBox;
 
+	p = b->p;
+	for (i = 0; i < b->n; i++)
+	{
+		if (ix == 0 && p->pos.x < 0)
+		{
+			p->vel.x = -p->vel.x;
+			p->pos.x = -p->pos.x;
+		} else if (ix == nb && p->pos.x > worldSize)
+		{
+			p->vel.x = -p->vel.x;
+			p->pos.x = worldSize - (p->pos.x - worldSize);
+		}
+
+		if (iy == 0 && p->pos.y < 0)
+		{
+			p->vel.y = -p->vel.y;
+			p->pos.y = -p->pos.y;
+		} else if (iy == nb && p->pos.y > worldSize)
+		{
+			p->vel.y = -p->vel.y;
+			p->pos.y = worldSize - (p->pos.y - worldSize);
+		}
+
+		if (iz == 0 && p->pos.z < 0)
+		{
+			p->vel.z = -p->vel.z;
+			p->pos.z = -p->pos.z;
+		} else if (iz == nb && p->pos.z > worldSize)
+		{
+			p->vel.z = -p->vel.z;
+			p->pos.z = worldSize - (p->pos.z - worldSize);
+		}
+	
+		p = p->next;
+	}
+}
 
 void stepWorld(void)
 {
 	Box *origBox, *newBox;
 	float dt = config.timeStep;
-	float worldSize = config.numBox * config.boxSize;
 	int nb = config.numBox;
 	int i, j;
 
@@ -312,6 +351,18 @@ void stepWorld(void)
 
 	}
 
+	for (i = 0; i < nb; i++)
+	for (j = 0; j < nb; j++)
+	{
+		/* TODO less naive */
+		collideWalls( i,  j,  0);
+		collideWalls( i,  0,  j);
+		collideWalls( 0,  i,  j);
+
+		collideWalls( i,  j, nb);
+		collideWalls( i, nb,  j);
+		collideWalls(nb,  i,  j);
+	}
 	/* Advance each particle and if necessary, put them in the new box
 	 * where they belong */
 	for (i = 0; i < nb*nb*nb; i++)
@@ -333,6 +384,7 @@ void stepWorld(void)
 			scale(&p->vel, dt, &dx);
 			add(&p->pos, &dx, &p->pos);
 
+			/*
 			if (p->pos.x >= worldSize)
 				p->pos.x -= worldSize;
 			else if (p->pos.x < 0)
@@ -347,7 +399,7 @@ void stepWorld(void)
 				p->pos.z -= worldSize;
 			else if (p->pos.z < 0)
 				p->pos.z += worldSize;
-
+			*/
 
 			newBox = boxFromParticle(p);
 			
