@@ -2,13 +2,11 @@ maxtime=100
 maxiter=500
 
 radius=0.5
-worldsize=40
-maxboxnum=40
+worldsize=50
+maxboxnum=50
 
-for i in $(seq 5 1 100)
+for npart in $(seq 50 50 10000)
 do
-	npart=$(./calc $i ^ 2)
-
 	list=""
 	for nbox in $(seq 5 1 $maxboxnum)
 	do

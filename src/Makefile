@@ -10,8 +10,14 @@ profile:
 	make -B PROFILE="-pg -DNDEBUG"
 debug:
 	make -B OPTIM="-O0 -DDEBUG"
-nooptim:
+O0:
 	make -B OPTIM="-O0 -DNDEBUG"
+O1:
+	make -B OPTIM="-O1 -DNDEBUG"
+O2:
+	make -B OPTIM="-O2 -DNDEBUG"
+O3:
+	make -B OPTIM="-O3 -DNDEBUG"
 brown:
 	make -B BROWN="-DBROWNIAN -O3 -DNDEBUG"
 
