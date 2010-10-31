@@ -3,5 +3,6 @@
 *.log
 *.aux
 *.csv
+octave-core
 core
 main

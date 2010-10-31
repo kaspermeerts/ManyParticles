@@ -1,5 +1,5 @@
 \section{Scientific model}
-\subsection{Maxwell-Boltzmann distribution}
+\subsection{Speed distribution}
 
 The well-known \textbf{Maxwell-Boltzmann distribution} describes the molecular 
 speed for a monoatomic classical ideal gas in thermodynamic equilibrium.
@@ -46,20 +46,164 @@ $$
 f(v)\dif v=\beta m ve^{-\beta \frac{mv^2}{2}} \dif v
 $$
 
-\subsection{Elastic collision}
+\subsection{Collisions}
 
-The most basic interaction that needs to be modeled in a many particle system 
-is the elastic collision between hard spheres or disks. Consider two particles 
-denoted by subscripts 1 and 2. Let $m_i$ be the masses, $v_c$ be the the 
-velocity of the center of mass (COM) frame, $v_i$ the velocities before the 
-collision, $v'_i$ the velocities before collision in the COM frame, $w_i$ the 
-velocities after the collision and $w'_i$ the velocities after collision in the 
-COM frame. We assume the speed of both bodies is non-relativistic.
+The most basic short-range interaction that can be modeled in a many particle 
+system is the elastic collision between hard spheres or disks. It is important 
+that this interaction is not only addressed correctly, but also efficiently.  
+Therefore, we want to avoid calculating computationally expensive trigonometric 
+functions like sine and cosine and try to keep square roots to a minimum.
 
-The one-dimensional results are well known
+Collision simulations function in basically two ways, where the collisions are 
+detected before they happen, \emph{a priori}, or after, \emph{a posteriori}.  
+
+In the a posteriori case, we advance the simulation by a small step each 
+iteration and check if collisions have happened. If they did, we roll the 
+simulation back a short while to before the collision happened and restore the 
+situation correctly. In the a priori case, our collision detection algorithm 
+needs to interpolate the positions of various bodies to predict whether a 
+collision will happen or not.
+
+A priori algorithms are more stable and correcter, because the intersections of 
+bodies that need to be fixed in the a posteriori case are unphysical. However, 
+determining ahead of time when two bodies will collide is very difficult and it 
+requires the collision detection algorithm to know about the physics of moving 
+bodies.
+
+Since we detect collisions a posteriori, we need to restore the situation to 
+before the collision. Thus, we need to rewind each pair of intersecting spheres 
+to before the collision. Assuming there is no external forcefield, the 
+particles are in a state of uniform rectilinear motion. The equation we need to 
+solve for the time $t$ is
+$$
+|\vec{r_1}(t) - \vec{r_2}(t)| = R_1 + R_2
+$$
+with $\vec{r_i}$ the position vectors of the bodies and $R_i$ their radii.  
+Since their motion is uniform, this becomes
+$$
+|\vec{r_1}{t_0} + \vec{v_1}\Delta t - \vec{r_2}{t_0} - \vec{v_2}\Delta t| = | 
+\Delta\vec{r} + \Delta\vec{v} \Delta t | = R_1 + R_2
+$$
+with $\Delta\vec{r}$ and $\Delta\vec{v}$ the particles' relative position and 
+motion and $\Delta t$ the sought after time difference. Squaring both sides, we 
+find
+$$
+(\Delta\vec{r})^2 + 2\Delta\vec{v}\Delta\vec{r}\Delta t + 
+(\Delta\vec{v})^2(\Delta t)^2 = (R_1 + R_2)^2
+$$
+The solutions of this quadratic equation are
+$$
+\Delta t = \frac{-2\Delta\vec{v}\Delta\vec{r} \pm 
+\sqrt{4(\Delta\vec{v}\Delta\vec{r})^2 - 4(\Delta\vec{v})^2((\Delta\vec{r})^2 - 
+(R_1 + R_2)^2)}}{2(\Delta\vec{v})^2}
+$$
+As $\Delta\vec{v}\Delta\vec{r}$ is typically a negative number and $R_1 + R_2$ 
+is always greater than $|\Delta\vec{r}|$, we take the positive squareroot and 
+simplify
+$$
+\Delta t=\frac{-\Delta\vec{v}\Delta\vec{r} + 
+\sqrt{(\Delta\vec{v}\Delta\vec{r})^2 + 
+(\Delta\vec{v})^2((R_1+R_2)^2-(\Delta\vec{r})^2)}}{(\Delta\vec{v})^2}
+$$
+With this value, we can put the particles back in their original position 
+before the collision. Now, we need to handle the collision itself.
+
+\subsubsection{One-dimensional elastic collision}
+
+Consider two particles denoted by subscripts 1 and 2.  Let $m_i$ be the masses, 
+$v_c$ be the the velocity of the center of mass (COM) frame, $v_i$ the 
+velocities before the collision, $v'_i$ the velocities before collision in the 
+COM frame, $w_i$ the velocities after the collision and $w'_i$ the velocities 
+after collision in the COM frame.  We assume the speed of both bodies is 
+non-relativistic. 
+
+To considerably simplify the equations, we are going to transform to the 
+intertial frame of the center of mass (COM). The COM velocity is
 $$
 v_c = \frac{m_1 v_1 + m_2 v_2}{m_1 + m_2}
 $$
+
+The resulting velocities in the new frame are
 $$
-v_1 = \exp{c}
+v'_1 = v_1 - v_c = \frac{m_2}{m_1+m_2}(v_1-v_2)
 $$
+and
+$$
+v'_2 = v_2 - v_c = \frac{m_1}{m_1+m_2}(v_2-v_1)
+$$
+
+In this frame, the total momentum must be zero before and after the collision.  
+The kinetic energy must also be conserved.
+Thus
+$$
+p_1 + p_2 = q_1 + q_2 = 0
+$$
+and
+$$
+\frac{p_1^2}{2m_1} + \frac{p_2^2}{2m_2} = \frac{q_1^2}{2m_1} + 
+\frac{q_2^2}{2m_2}
+$$
+where $p_i$ and $q_i$ are the momenta respectively before and after the 
+collision.
+
+From this follows that
+$$
+q_2 = -q_1
+$$
+and
+$$
+p_2 = -p_1
+$$
+which we can fill in in the energy equation
+$$
+p_1^2 = q_1^2
+$$
+and
+$$
+p_2^2 = q_2^2
+$$
+The only possible solutions are $q_i = p_i$, that is no collision happened at 
+all, or $q_i = -p_i$. This means that the velocities of both bodies are 
+flipped.
+
+$$
+w'_i = -v'_i
+$$
+
+Thus we can derive the velocities in the original frame of reference
+$$
+w_1 = w'_1 + v_c = \frac{v_1(m_1-m_2) + 2m_2u_2}{m_1+m_2}
+$$
+
+$$
+w_2 = w'_2 + v_c = \frac{v_2(m_2-m_1) + 2m_1u_1}{m_1+m_2}
+$$
+
+\subsubsection{Two- and higher-dimensional elastic collisions}
+Because the colliding bodies are spheres, the only forces they can exert on 
+each other at the contact point are according to the normal vector of each 
+sphere at the contact point. The tangential component(s) of the momentum of 
+each body do not change while the normal component is transformed according to 
+the equations of an elastic collision. To get the normal vector, we simply 
+normalise the displacement vector between the bodies
+$$
+\vec{d} = \frac{\Delta\vec{r}}{|\Delta\vec{r}|}
+$$
+
+\subsection{Spatial partitioning}
+
+Most many-particle simulations incorporate some sort of interaction between the 
+particles dependent on their mutual distance. Of considerable interest are 
+short-range interactions, for example when the particles represent atoms. Since 
+a particle could hypothetically interact with every other particle, each pair 
+needs to be tested separately. Thus $n(n-1)/2$ interactions will be considered, 
+with $n$ the number of particles. Most of these are useless because the 
+particles are too far apart. This $O(n^2)$ complexity is undesirable for 
+performance reasons. An often used technique is called \textbf{spatial 
+partitioning}.
+
+By splitting the world into smaller partitions,\emph{boxes}, one only has to 
+check for interactions between particles in nearby partitions. If we keep the 
+particles per box a constant ($x$), the amount of boxes becomes $n/x$. The 
+complexity of this problem reduces in this way to $O(x^2 * n/x) = O(n)$, linear 
+in the number of particles.

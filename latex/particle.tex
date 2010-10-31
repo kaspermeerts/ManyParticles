@@ -1,8 +1,10 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[dutch]{babel}
-
+\usepackage{listings}
 \usepackage{a4wide}
 \newcommand{\dif}{\,\mathrm d}
+
+\lstloadlanguages{C}
 
 \author{Roald Frederickx\\Kasper Meerts}
 \title{Simulation of a many-particle system using space partitioning}
@@ -12,5 +14,6 @@
 \maketitle
 
 \input{model.tex}
+\input{implementation.tex}
 
 \end{document}
