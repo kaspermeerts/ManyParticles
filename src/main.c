@@ -5,6 +5,7 @@
 #include <time.h>
 #include <SDL/SDL.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include "main.h"
 #include "vmath.h"
 #include "system.h"
@@ -166,7 +167,7 @@ void parseArguments(int argc, char **argv)
 	config.timeStep = 0.01;
 
 
-	while ((c = getopt(argc, argv, ":i:t:r")) != -1)
+	while ((c = getopt(argc, argv, ":i:t:rdb")) != -1)
 	{
 		switch (c)
 		{
@@ -183,6 +184,12 @@ void parseArguments(int argc, char **argv)
 			break;
 		case 'r':
 			config.render = true;
+			break;
+		case 'd':
+			config.dump = true;
+			break;
+		case 'b':
+			config.bench = true;
 			break;
 		case ':':
 			die("Option -%c requires an argument\n", optopt);
@@ -227,6 +234,8 @@ void die(const char *fmt, ...)
 int main(int argc, char **argv)
 {
 	int i;
+	struct timeval before, after;
+	int diff;
 
 	parseArguments(argc, argv);
 
@@ -234,7 +243,6 @@ int main(int argc, char **argv)
 
 	allocWorld();
 	fillWorld();
-	/*printStats();*/
 	
 	if (config.render)
 	{
@@ -242,6 +250,10 @@ int main(int argc, char **argv)
 		renderLoop();
 	}
 	else
+	{
+		if (config.bench)
+			gettimeofday(&before, NULL);
+
 		for (i = 0; i < config.iterations; i++)
 		{
 #ifdef BROWNIAN
@@ -253,12 +265,23 @@ int main(int argc, char **argv)
 #endif
 			stepWorld();
 		}
+
+		if (config.bench)
+		{
+			gettimeofday(&after, NULL);
+
+			diff = (after.tv_sec  - before.tv_sec)  * 1000 +
+			       (after.tv_usec - before.tv_usec) / 1000;
+
+			printf("%d\n", diff);
+		}
+	}
 	
-	/*printStats();*/
 	sanityCheck();
 
 #ifndef BROWNIAN
-	dumpWorld();
+	if (config.dump)
+		dumpWorld();
 #endif
 	freeWorld();
 

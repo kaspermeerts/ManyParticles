@@ -28,6 +28,8 @@ typedef struct world
 typedef struct config
 {
 	bool render;
+	bool dump;
+	bool bench;
 
 	/* The same for every dimension */
 	float boxSize;
