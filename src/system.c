@@ -12,7 +12,20 @@ Config config;
 Particle huge;
 #endif
 
-Box *boxFromParticle(const Particle *p)
+static Particle *collides(const Particle *p);
+static Particle *collideWith(const Particle *p, Particle *ps);
+static void collideWalls(int ix, int iy, int iz);
+static void handleCollision(Particle *p1, Particle *p2);
+#ifdef BROWNIAN
+static void handleCollisionHuge(Particle *p);
+#endif
+static Box *boxFromParticle(const Particle *p);
+static Box *boxFromIndex(int nx, int ny, int nz);
+static void addToBox(Particle *p, Box *b);
+static void removeFromBox(Particle *p, Box *from);
+
+
+static Box *boxFromParticle(const Particle *p)
 {
 	int nx, ny, nz;
 
@@ -23,7 +36,7 @@ Box *boxFromParticle(const Particle *p)
 	return boxFromIndex(nx, ny, nz);
 }
 
-Box *boxFromIndex(int ix, int iy, int iz)
+static Box *boxFromIndex(int ix, int iy, int iz)
 {
 	int nb = config.numBox;
 	
@@ -45,7 +58,7 @@ Box *boxFromIndex(int ix, int iy, int iz)
 	return world.grid + ix*nb*nb + iy*nb + iz;
 }
 
-Particle *collides(const Particle *p)
+static Particle *collides(const Particle *p)
 {
 	Particle *other;
 	Box *b;
@@ -86,7 +99,7 @@ Particle *collides(const Particle *p)
 }
 
 /* p is the particle we're checking, ps is the first particle in the box */
-Particle *collideWith(const Particle *p, Particle *ps)
+static Particle *collideWith(const Particle *p, Particle *ps)
 {
 	Particle *other = ps;
 	Vec3 diff;
@@ -114,7 +127,7 @@ Particle *collideWith(const Particle *p, Particle *ps)
 }
 
 #ifdef BROWNIAN
-void handleCollisionHuge(Particle *p)
+static void handleCollisionHuge(Particle *p)
 {
 	Vec3 phuge;
 	Vec3 dv, dr, dx1, dx2, d;
@@ -165,7 +178,7 @@ void handleCollisionHuge(Particle *p)
 }
 #endif
 
-void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
+static void handleCollision(Particle *__restrict__ p1, Particle *__restrict__ p2)
 {
 	Vec3 dv, dr, dx1, dx2, d;
 	Vec3 comv, comv1; /* Center Of Mass velocity */
@@ -232,6 +245,74 @@ bool allocWorld()
 	return true;
 }
 
+void fillWorld()
+{
+	Box *box;
+	int i;
+	Particle *ps = world.parts;
+	float v, u, phi;
+	float worldSize = config.numBox * config.boxSize;
+
+#ifdef BROWNIAN
+	huge.pos.x = worldSize / 2;
+	huge.pos.y = worldSize / 2;
+	huge.pos.z = worldSize / 2;
+
+	huge.vel.x = 0;
+	huge.vel.y = 0;
+	huge.vel.z = 0;
+
+	config.radiusHuge = config.radius * 20;
+	config.massHuge = 1;
+#endif
+
+	for (i = 0; i < config.numParticles; i++)
+	{
+		do
+		{
+			/* To avoid hitting the exact boundary of the world
+			 * shift 32 bits to 23 bits, the precision of a float
+			 * mantissa */
+			ps[i].pos.x = (rand() >> 9) * worldSize / 
+					((RAND_MAX >> 9) + 1U);
+			ps[i].pos.y = (rand() >> 9) * worldSize /
+					((RAND_MAX >> 9) + 1U);
+			ps[i].pos.z = (rand() >> 9) * worldSize / 
+					((RAND_MAX >> 9) + 1U);
+		} while (collides(&ps[i]));
+
+		/* Sphere surface point picking is trickier than might seem */
+		phi = 2 * M_PI * rand() / (double) (RAND_MAX + 1U);
+		u = rand() / (RAND_MAX / 2.) - 1;
+		v = 1; /*rand() / (RAND_MAX / 1.);*/
+
+		ps[i].vel.x = v * sqrt(1-u*u) * cos(phi);
+		ps[i].vel.y = v * sqrt(1-u*u) * sin(phi);
+		ps[i].vel.z = v * u;
+
+		box = boxFromParticle(&ps[i]);
+		addToBox(&ps[i], box);
+	}
+	
+	/*
+	ps[0].pos.x = 0.2;
+	ps[0].pos.y = 0.5;
+	ps[0].pos.z = 0.5;
+
+	ps[0].vel.x = 0.20;
+	ps[0].vel.y = 0.05;
+	ps[0].vel.z = 0.0;
+
+	ps[1].pos.x = 0.8;
+	ps[1].pos.y = 0.5;
+	ps[1].pos.z = 0.5;
+
+	ps[1].vel.x = 0.00;
+	ps[1].vel.y = 0.0;
+	ps[1].vel.z = 0.0;
+	*/
+}
+
 void freeWorld()
 {
 	free(world.grid);
@@ -278,7 +359,7 @@ void densityDump(void)
 	return;
 }
 
-void collideWalls(int ix, int iy, int iz)
+static void collideWalls(int ix, int iy, int iz)
 {
 	int i;
 	int nb = config.numBox;
@@ -417,7 +498,7 @@ void stepWorld(void)
 	return;
 }
 
-void removeFromBox(Particle *p, Box *from)
+static void removeFromBox(Particle *p, Box *from)
 {
 	assert(p != NULL);
 	assert(from->n != 0);
@@ -445,7 +526,7 @@ void removeFromBox(Particle *p, Box *from)
 
 }
 
-void addToBox(Particle *p, Box *b)
+static void addToBox(Particle *p, Box *b)
 {
 	if (b->p == NULL)
 	{
@@ -463,4 +544,94 @@ void addToBox(Particle *p, Box *b)
 	}
 
 	b->n++;
+}
+
+void sanityCheck()
+{
+	int i, j, nParts1, nParts2;
+	const Particle *p1;
+	float totKE = 0;
+	Vec3 totP = {0, 0, 0};
+	nParts1 = 0;
+	nParts2 = 0;
+
+	/* Make sure particle are not too close together and that their linked
+	 * list is consistent */
+	for (i = 0; i < config.numParticles; i++)
+	{
+		float v2;
+		p1 = &world.parts[i];
+		v2 = dot(&p1->vel, &p1->vel);
+		totKE += v2/2;
+		add(&totP, &p1->vel, &totP);
+		/*
+		for (j = i + 1; j < config.numParticles; j++)
+		{
+			const Particle *p2;
+			float d;
+			p2 = &world.parts[j];
+			d = distance(&p1->pos, &p2->pos);
+			if (d < p1->r + p2->r)
+				fprintf(stderr, "%f %f %f PROBLEM?\n", 
+						d, p1->r, p2->r);
+		}
+		*/
+		if (p1->next->prev != p1 || p1->prev->next != p1)
+			fprintf(stderr, "%p is in a borked list\n",
+					(const void *) p1);
+	}
+
+	/* Check if each particle is in the box it should be in given it's
+	 * coordinates and count the number of particles and check them with
+	 * the total */
+	for (i = 0; i < config.numBox * config.numBox * config.numBox; i++)
+	{
+		Box *b = &world.grid[i];
+		const Particle *p, *first;
+
+		if (b->p == NULL)
+		{
+			if (b->n != 0)
+				fprintf(stderr, "Box %d: found zero, expected"
+						" %d\n", i, b->n);
+			continue;
+		}
+
+		first = b->p;
+		p = first;
+		j = 0;
+		do
+		{
+			Box *correctBox = boxFromParticle(p);
+			if (correctBox != b)
+			{
+				fprintf(stderr, "Particle is in box %d, "
+				"should be in %ld\n", i, (correctBox -
+				world.grid)/sizeof(*correctBox));
+			}
+			j++;
+			nParts1++;
+			p = p->next;
+		} while (p != first);
+
+		if (j != b->n)
+		{
+			fprintf(stderr, "Box %d: found %d, expected %d\n", 
+					i, j, b->n);
+		}
+		nParts2 += b->n;
+	}
+
+	if (nParts1 != config.numParticles)
+	{
+		fprintf(stderr, "1: Found a total of %d particles, "
+			"should be %d\n", nParts1, config.numParticles);
+	}
+
+	if (nParts2 != config.numParticles)
+	{
+		fprintf(stderr, "2: Found a total of %d particles, "
+			"should be %d\n", nParts2, config.numParticles);
+	}
+	return;
 }

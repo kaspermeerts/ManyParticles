@@ -14,7 +14,8 @@ GLfloat light_pos[] = {  3.0, 1.0, 1.0, 0.0 };
 GLfloat light_diff[] = { 1.0, 1.0, 1.0, 0.0 };
 GLfloat light_spec[] = { 1.0, 0.0, 0.0, 1.0 };
 GLfloat light_ambi[] = { 1.0, 1.0, 1.0, 1.0 };
-void renderSphere(float x, float y, float z, float r);
+
+static void renderSphere(float x, float y, float z, float r);
 
 int initRender(void)
 {
@@ -124,7 +125,7 @@ int render(void)
 	return 0;
 }
 
-void renderSphere(float x, float y, float z, float r)
+static void renderSphere(float x, float y, float z, float r)
 {
 	const int stacks = 8;
 	const int slices = 8;

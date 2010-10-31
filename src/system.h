@@ -46,22 +46,13 @@ typedef struct config
 } Config;
 
 int main(int argc, char ** argv);
-Particle *collides(const Particle *p);
-Particle *collideWith(const Particle *p, Particle *ps);
-void collideWalls(int ix, int iy, int iz);
-void handleCollision(Particle *p1, Particle *p2);
-#ifdef BROWNIAN
-void handleCollisionHuge(Particle *p);
-#endif
-Box *boxFromParticle(const Particle *p);
-Box *boxFromIndex(int nx, int ny, int nz);
-void addToBox(Particle *p, Box *b);
-void removeFromBox(Particle *p, Box *from);
 bool allocWorld(void);
+void fillWorld(void);
 void freeWorld(void);
 void dumpWorld(void);
 void densityDump(void);
 void stepWorld(void);
+void sanityCheck(void);
 
 extern World world;
 extern Config config;

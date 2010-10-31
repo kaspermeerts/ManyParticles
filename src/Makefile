@@ -1,4 +1,4 @@
-OBJECTS = system.o main.o render.o setup.o
+OBJECTS = system.o main.o render.o
 WARNINGS = -pedantic -Wextra -Wall -Wwrite-strings -Wshadow -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
 BROWN = 
 PROFILE = 
