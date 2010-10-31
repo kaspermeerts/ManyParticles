@@ -6,6 +6,7 @@
 #include <SDL/SDL.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 #include "main.h"
 #include "vmath.h"
 #include "system.h"
@@ -17,7 +18,7 @@ int renderLoop(void);
 void parseArguments(int argc, char **argv);
 void printStats(void);
 
-int renderLoop(void)
+static int renderLoop(void)
 {
 	SDL_Event event;
 
@@ -45,7 +46,7 @@ int renderLoop(void)
 	}
 }
 
-void printStats()
+static void printStats()
 {
 	int i;
 	const Particle *p;
@@ -68,7 +69,7 @@ void printStats()
 	return;
 }
 
-void sanityCheck()
+static void sanityCheck()
 {
 	int i, j, nParts1, nParts2;
 	const Particle *p1;
@@ -158,14 +159,14 @@ void sanityCheck()
 	return;
 }
 
-void parseArguments(int argc, char **argv)
+static void parseArguments(int argc, char **argv)
 {
 	int c;
 
 	/* Sane defaults */
 	config.iterations = 100;
 	config.timeStep = 0.01;
-	config.maxTime = 0;
+	config.maxTime = -1;
 
 
 	while ((c = getopt(argc, argv, ":i:t:rdb:")) != -1)
@@ -174,6 +175,9 @@ void parseArguments(int argc, char **argv)
 		{
 		case 'i':
 			config.iterations = atoi(optarg);
+			if (config.iterations < 0)
+				die("Invalid number of iterations %d\n",
+						config.iterations);
 			break;
 		case 't':
 			config.timeStep = atof(optarg);
@@ -188,7 +192,8 @@ void parseArguments(int argc, char **argv)
 			break;
 		case 'b':
 			config.bench = true;
-			config.maxTime = atoi(optarg);
+			if (optarg != NULL)
+				config.maxTime = atof(optarg) / 1000;
 			break;
 		case ':':
 			die("Option -%c requires an argument\n", optopt);
@@ -208,7 +213,7 @@ void parseArguments(int argc, char **argv)
 	if (argc < 4)
 		die("Usage: main <box size> <box number> <particle number> "
 					"<radius>\n"
-		    "            [-t timestep] [-i iterations] [-b max ms]\n");
+		    "            [-t timestep] [-i iterations] [-b [max milisec]]\n");
 
 	config.boxSize = atof(argv[0]);
 	config.numBox = atoi(argv[1]);
@@ -230,11 +235,22 @@ void die(const char *fmt, ...)
 	return;
 }
 
+static double timeDifference(struct rusage *begin, struct rusage *end)
+{
+	struct timeval *b = &begin->ru_utime;
+	struct timeval *e = &end->ru_utime;
+
+	return e->tv_sec - b->tv_sec  +  
+			(double)(e->tv_usec - b->tv_usec)/1000000;
+}
+
+
 int main(int argc, char **argv)
 {
 	int i;
-	struct timeval before, after;
-	int diff;
+	struct rusage startTime, endTime;
+	double timeDiff;
+
 
 	parseArguments(argc, argv);
 
@@ -251,9 +267,9 @@ int main(int argc, char **argv)
 	else
 	{
 		if (config.bench)
-			gettimeofday(&before, NULL);
+			getrusage(RUSAGE_SELF, &startTime);
 
-		for (i = 0; i < config.iterations || config.iterations < 0; i++)
+		for (i = 0; i < config.iterations; i++)
 		{
 #ifdef BROWNIAN
 			if (i%10 == 0)
@@ -266,28 +282,26 @@ int main(int argc, char **argv)
 
 			if (config.bench && config.maxTime > 0)
 			{
-				gettimeofday(&after, NULL);
-
-				diff = (after.tv_sec  - before.tv_sec) * 1000 +
-				       (after.tv_usec - before.tv_usec) / 1000;
-
-				if (diff > config.maxTime)
+				getrusage(RUSAGE_SELF, &endTime);
+				timeDiff = timeDifference(&startTime, &endTime);
+				if (timeDiff > config.maxTime)
+				{
+					i++;
 					break;
+				}
 			}
 		}
 
 		if (config.bench)
 		{
-			gettimeofday(&after, NULL);
-
-			diff = (after.tv_sec  - before.tv_sec)  * 1000 +
-			       (after.tv_usec - before.tv_usec) / 1000;
-
-			printf("%d %d\n", i, diff);
+			getrusage(RUSAGE_SELF, &endTime);
+			timeDiff = timeDifference(&startTime, &endTime);
+			printf("%f\n", i / timeDiff);
 		}
 	}
-	
-	sanityCheck();
+
+	if (!config.bench)
+		sanityCheck();
 
 #ifndef BROWNIAN
 	if (config.dump)

@@ -30,7 +30,7 @@ typedef struct config
 	bool render;
 	bool dump;
 	bool bench;
-	int maxTime;
+	double maxTime;
 
 	/* The same for every dimension */
 	float boxSize;
