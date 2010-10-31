@@ -2,14 +2,14 @@ OBJECTS = system.o main.o render.o setup.o
 WARNINGS = -pedantic -Wextra -Wall -Wwrite-strings -Wshadow -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes
 BROWN = 
 PROFILE = 
-OPTIM = -O0
+OPTIM = -O3 -DNDEBUG
 CFLAGS = $(WARNINGS) -ansi -march=native -ggdb $(OPTIM) $(PROFILE) $(BROWN)
 
 all: main
 profile:
 	make -B PROFILE="-pg -DNDEBUG"
-optim:
-	make -B OPTIM="-O3 -DNDEBUG"
+debug:
+	make -B OPTIM="-O0 -DDEBUG"
 brown:
 	make -B BROWN="-DBROWNIAN -O3 -DNDEBUG"
 

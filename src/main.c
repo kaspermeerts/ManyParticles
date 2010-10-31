@@ -165,17 +165,15 @@ void parseArguments(int argc, char **argv)
 	/* Sane defaults */
 	config.iterations = 100;
 	config.timeStep = 0.01;
+	config.maxTime = 0;
 
 
-	while ((c = getopt(argc, argv, ":i:t:rdb")) != -1)
+	while ((c = getopt(argc, argv, ":i:t:rdb:")) != -1)
 	{
 		switch (c)
 		{
 		case 'i':
 			config.iterations = atoi(optarg);
-			if (config.iterations < 0)
-				die("Invalid number of iterations %d\n",
-						config.iterations);
 			break;
 		case 't':
 			config.timeStep = atof(optarg);
@@ -190,6 +188,7 @@ void parseArguments(int argc, char **argv)
 			break;
 		case 'b':
 			config.bench = true;
+			config.maxTime = atoi(optarg);
 			break;
 		case ':':
 			die("Option -%c requires an argument\n", optopt);
@@ -209,7 +208,7 @@ void parseArguments(int argc, char **argv)
 	if (argc < 4)
 		die("Usage: main <box size> <box number> <particle number> "
 					"<radius>\n"
-		    "            [-t timestep] [-i iterations] [-s setup]\n");
+		    "            [-t timestep] [-i iterations] [-b max ms]\n");
 
 	config.boxSize = atof(argv[0]);
 	config.numBox = atoi(argv[1]);
@@ -254,7 +253,7 @@ int main(int argc, char **argv)
 		if (config.bench)
 			gettimeofday(&before, NULL);
 
-		for (i = 0; i < config.iterations; i++)
+		for (i = 0; i < config.iterations || config.iterations < 0; i++)
 		{
 #ifdef BROWNIAN
 			if (i%10 == 0)
@@ -264,6 +263,17 @@ int main(int argc, char **argv)
 			}
 #endif
 			stepWorld();
+
+			if (config.bench && config.maxTime > 0)
+			{
+				gettimeofday(&after, NULL);
+
+				diff = (after.tv_sec  - before.tv_sec) * 1000 +
+				       (after.tv_usec - before.tv_usec) / 1000;
+
+				if (diff > config.maxTime)
+					break;
+			}
 		}
 
 		if (config.bench)
@@ -273,7 +283,7 @@ int main(int argc, char **argv)
 			diff = (after.tv_sec  - before.tv_sec)  * 1000 +
 			       (after.tv_usec - before.tv_usec) / 1000;
 
-			printf("%d\n", diff);
+			printf("%d %d\n", i, diff);
 		}
 	}
 	
