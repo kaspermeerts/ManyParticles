@@ -93,17 +93,19 @@ $$
 $$
 The solutions of this quadratic equation are
 $$
-\Delta t = \frac{-2\Delta\vec{v}\Delta\vec{r} \pm 
-\sqrt{4(\Delta\vec{v}\Delta\vec{r})^2 - 4(\Delta\vec{v})^2((\Delta\vec{r})^2 - 
-(R_1 + R_2)^2)}}{2(\Delta\vec{v})^2}
+\Delta t = \frac{-2\Delta\vec{v}\Delta\vec{r}
+\pm \sqrt{4( \Delta\vec{v}\Delta\vec{r})^2 -
+4|\Delta\vec{v}|^2 \left( |\Delta\vec{r}|^2 - (R_1 + R_2)^2 \right) }}
+{2|\Delta\vec{v}|^2}
 $$
 As $\Delta\vec{v}\Delta\vec{r}$ is typically a negative number and $R_1 + R_2$ 
-is always greater than $|\Delta\vec{r}|$, we take the positive squareroot and 
+is always greater than $|\Delta\vec{r}|$, we take the positive square root and 
 simplify
 $$
 \Delta t=\frac{-\Delta\vec{v}\Delta\vec{r} + 
-\sqrt{(\Delta\vec{v}\Delta\vec{r})^2 + 
-(\Delta\vec{v})^2((R_1+R_2)^2-(\Delta\vec{r})^2)}}{(\Delta\vec{v})^2}
+\sqrt{(\Delta\vec{v}\Delta\vec{r})^2 + |\Delta\vec{v}|^2
+((R_1+R_2)^2 -|\Delta\vec{r}|^2)}}
+{|\Delta\vec{v}|^2}
 $$
 With this value, we can put the particles back in their original position 
 before the collision. Now, we need to handle the collision itself.
@@ -202,8 +204,8 @@ particles are too far apart. This $O(n^2)$ complexity is undesirable for
 performance reasons. An often used technique is called \textbf{spatial 
 partitioning}.
 
-By splitting the world into smaller partitions,\emph{boxes}, one only has to 
+By splitting the world into smaller partitions, \emph{boxes}, one only has to 
 check for interactions between particles in nearby partitions. If we keep the 
 particles per box a constant ($x$), the amount of boxes becomes $n/x$. The 
-complexity of this problem reduces in this way to $O(x^2 * n/x) = O(n)$, linear 
-in the number of particles.
+complexity of this problem reduces in this way to $O(x^2 \cdot n/x) = O(n)$, 
+linear in the number of particles.
