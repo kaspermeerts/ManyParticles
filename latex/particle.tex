@@ -2,7 +2,22 @@
 \usepackage[dutch]{babel}
 \usepackage{listings}
 \usepackage{a4wide}
-\newcommand{\dif}{\,\mathrm d}
+\usepackage[pdftex]{graphicx}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[dutch]{babel}
+\usepackage{subfigure}
+\usepackage[pdftex]{graphicx}
+\usepackage{epstopdf}
+\usepackage{wasysym}
+\usepackage{verbatim} %comment env
+%\usepackage{placeins} %/FloatBarrier ipv /clearpage
+\usepackage{a4wide}
+\usepackage[format=hang,labelfont=bf]{caption}
+\usepackage{listings}
+
 
 \lstloadlanguages{C}
 \lstset{
@@ -31,5 +46,6 @@
 
 \input{model.tex}
 \input{implementation.tex}
+\input{performance.tex}
 
 \end{document}

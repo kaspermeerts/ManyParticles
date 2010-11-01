@@ -1,5 +1,7 @@
 \newcommand{\imgdir}{images}
 
+\newcommand{\dif}{\,\mathrm d}
+
 %Loosen up on figure placement restrictions
 %\renewcommand{\textfraction}{0.05}
 %\renewcommand{\topfraction}{0.95}
@@ -24,9 +26,10 @@
     \begin{figure}[#1]
 	\begin{center}
 		\scalebox{0.9}{
-			\nonstopmode
-			\input{\imgdir/#2.tex}
-			\errorstopmode
+%			\nonstopmode
+			%\input{\imgdir/#2.tex}
+			\input{images/#2.tex}
+%			\errorstopmode
 		}
 		\caption{#3\label{#2}}
         \end{center}
