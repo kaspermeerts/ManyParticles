@@ -3,14 +3,19 @@ maxiter=500
 
 radius=$1
 worldsize=$2
-maxpart=$3
-#maxboxnum=$(echo scale=0; $worldsize / (2 * $radius) | bc)
-maxboxnum=$4
 
-for npart in $(seq 50 50 $maxpart)
+minpart=$3
+partstep=$4
+maxpart=$5
+
+minboxnum=$6
+boxnumstep=$7
+maxboxnum=$8
+
+for npart in $(seq $minpart $partstep $maxpart)
 do
 	list=""
-	for nbox in $(seq 7 1 $maxboxnum)
+	for nbox in $(seq $minboxnum $boxnumstep $maxboxnum)
 	do
 		boxsize=$(./calc $worldsize / $nbox)
 		output=$(../../main $boxsize $nbox $npart $radius -i $maxiter -b $maxtime)
