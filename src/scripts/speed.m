@@ -1,3 +1,7 @@
+addpath('octave');
+destdir = "../../latex/images";
+relImgDir = "images";
+
 world1 = load("world1.csv");
 world2 = load("world2.csv");
 world3 = load("world3.csv");
@@ -13,3 +17,12 @@ T = 1/3;
 xt = linspace(0,max(x),100);
 yt = maxwellDist(T, xt);
 plot(x, y, 'o', xt, yt);
+
+
+name='maxwell';
+ylabrule='0.3cm';
+xlab='Speed';
+ylab='Probability density';
+width='700';
+height='500';
+makeGraph(name,destdir,relImgDir,xlab,ylab,ylabrule,width,height);
