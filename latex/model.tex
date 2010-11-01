@@ -1,27 +1,29 @@
 \section{Scientific model}
 \subsection{Collisions}
 
-The most basic short-range interaction that can be modeled in a many particle 
-system is the elastic collision between hard spheres or disks. It is important 
-that this interaction is not only addressed correctly, but also efficiently.  
-Therefore, we want to avoid calculating computationally expensive trigonometric 
-functions like sine and cosine and try to keep square roots to a minimum.
+The most basic short-range interaction that can be modeled in a many 
+particle system is the elastic collision between hard spheres (3D) or disks 
+(2D). It is important that this interaction is not only addressed 
+correctly, but also efficiently. Therefore, one wants to avoid calculating 
+computationally expensive trigonometric functions like sine and cosine and 
+try to keep square roots to a minimum.
 
-Collision simulations function in basically two ways, where the collisions are 
-detected before they happen, \emph{a priori}, or after, \emph{a posteriori}.  
+Collision simulations function in basically two ways, the collisions can be 
+detected before they happen, \emph{a priori}, or afterwards, \emph{a 
+posteriori}.
 
-In the a posteriori case, we advance the simulation by a small step each 
-iteration and check if collisions have happened. If they did, we roll the 
-simulation back a short while to before the collision happened and restore the 
-situation correctly. In the a priori case, our collision detection algorithm 
-needs to interpolate the positions of various bodies to predict whether a 
-collision will happen or not.
+In the a posteriori case, the simulation gets advanced by a small time step 
+each iteration. If a collisions has happened, the simulation gets rolled 
+back a short while to the exact moment of impact. The collision then gets 
+computed and the situation gets restored correctly. In the a priori case, 
+the collision detection algorithm needs to interpolate the positions of 
+various bodies to predict whether a collision will happen or not.
 
 A priori algorithms are more stable and correct, because the intersections of 
 bodies that need to be fixed in the a posteriori case are unphysical. However, 
 determining ahead of time when two bodies will collide is very difficult and it 
-requires the collision detection algorithm to know about the physics of moving 
-bodies.
+requires the collision detection algorithm to know about the physics of 
+moving bodies. Therefore we opted for the other method.
 
 Since we detect collisions a posteriori, we need to restore the situation to 
 before the collision. Thus, we need to rewind each pair of intersecting spheres 
@@ -41,22 +43,22 @@ with $\Delta\vec{r}$ and $\Delta\vec{v}$ the particles' relative position and
 motion and $\Delta t$ the sought after time difference. Squaring both sides, we 
 find
 $$
-(\Delta\vec{r})^2 + 2\Delta\vec{v}\Delta\vec{r}\Delta t + 
-(\Delta\vec{v})^2(\Delta t)^2 = (R_1 + R_2)^2
+|\Delta\vec{r}|^2 + 2\Delta\vec{v} \cdot \Delta\vec{r}\Delta t + 
+|\Delta\vec{v}|^2(\Delta t)^2 = (R_1 + R_2)^2
 $$
 The solutions of this quadratic equation are
 $$
-\Delta t = \frac{-2\Delta\vec{v}\Delta\vec{r}
-\pm \sqrt{4( \Delta\vec{v}\Delta\vec{r})^2 -
+\Delta t = \frac{-2\Delta\vec{v} \cdot \Delta\vec{r}
+\pm \sqrt{4( \Delta\vec{v} \cdot \Delta\vec{r})^2 -
 4|\Delta\vec{v}|^2 \left( |\Delta\vec{r}|^2 - (R_1 + R_2)^2 \right) }}
 {2|\Delta\vec{v}|^2}
 $$
-As $\Delta\vec{v}\Delta\vec{r}$ is typically a negative number and $R_1 + R_2$ 
-is always greater than $|\Delta\vec{r}|$, we take the positive square root and 
-simplify
+As $\Delta\vec{v} \cdot \Delta\vec{r}$ is typically a negative number and 
+$R_1 + R_2$ is always greater than $|\Delta\vec{r}|$, we take the positive 
+square root and simplify
 $$
-\Delta t=\frac{-\Delta\vec{v}\Delta\vec{r} + 
-\sqrt{(\Delta\vec{v}\Delta\vec{r})^2 + |\Delta\vec{v}|^2
+\Delta t=\frac{-\Delta\vec{v} \cdot \Delta\vec{r} +
+\sqrt{(\Delta\vec{v} \cdot \Delta\vec{r})^2 + |\Delta\vec{v}|^2
 ((R_1+R_2)^2 -|\Delta\vec{r}|^2)}}
 {|\Delta\vec{v}|^2}
 $$
@@ -138,8 +140,10 @@ $$
 $$
 The normal component of the velocity is
 $$
-\vec{v_n} = \vec{v} \cdot \vec{n}
+v_n = \vec{v} \cdot \vec{n}
 $$
+The change of this component can be caluclated by plugging it into the 
+equations above.
 
 \subsection{Spatial partitioning}
 
