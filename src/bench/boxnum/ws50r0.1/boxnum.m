@@ -3,6 +3,7 @@ destdir = "../../../../latex/images";
 relImgDir = "images";
 
 b = load("ws50r0.1-1.csv");
+b = [b;load("ws50r0.1-2.csv")];
 
 npart = b(:,1);
 nbox = b(:,2) .^ 3;
