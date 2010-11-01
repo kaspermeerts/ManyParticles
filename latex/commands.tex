@@ -1,0 +1,68 @@
+\newcommand{\imgdir}{images}
+
+%Loosen up on figure placement restrictions
+%\renewcommand{\textfraction}{0.05}
+%\renewcommand{\topfraction}{0.95}
+%\renewcommand{\bottomfraction}{0.95}
+%\renewcommand{\floatpagefraction}{0.35}
+ 
+
+%\figure[htb]{width=width+unit}{name=label}{caption}
+\newcommand{\fig}[4][htb]{
+    \begin{figure}[#1]
+        \begin{center}
+	    \includegraphics[#2]{\imgdir#3}\\
+	    %\parbox{#2}{\caption{#4\label{#3}}}
+	    %voor: \includegraphics[width=#2]{#3}\\
+	    \caption{#4\label{#3}}
+        \end{center}
+    \end{figure}}
+
+
+%\figOctave[htb]{name=label}{caption}
+\newcommand{\figOctave}[3][htb]{
+    \begin{figure}[#1]
+	\begin{center}
+		\scalebox{0.9}{
+			\nonstopmode
+			\input{\imgdir/#2.tex}
+			\errorstopmode
+		}
+		\caption{#3\label{#2}}
+        \end{center}
+    \end{figure}}
+
+% \figuurOctaveTwo[htb]{global label}{global caption}
+% 	{name1=label1}{caption1}
+% 	{name2=label2}{caption2}
+\newcommand{\figOctaveTwo}[7][htb]{
+	\begin{figure}[#1]
+	\begin{center}
+	\hspace{-4cm} %hack to center wider than \textwidth
+	\subfigure[#5]{ %sub-caption
+	\scalebox{0.9}{
+		\nonstopmode
+		\input{\imgdir/#4.tex}
+		\errorstopmode
+		\label{#4}
+		\rule[-0.8cm]{0cm}{0cm} %don't overlap with sub-caption
+	}
+	}
+	%
+	\rule{0.6cm}{0cm} %don't overlap axis labels
+	%
+	\subfigure[#7]{
+	\scalebox{0.9}{
+		\nonstopmode
+		\input{\imgdir/#6.tex}
+		\errorstopmode
+		\label{#6}
+		\rule[-0.8cm]{0cm}{0cm}
+		}
+	}
+	\hspace{-4cm} %center hack
+	\caption{#3\label{#2}}
+	\end{center}
+	\end{figure}
+}
+
