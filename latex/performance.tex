@@ -1,6 +1,16 @@
 \section{Performance}
 
-\figOctave[htb]{idealNbox}{Ideal number of boxes for given number of particles. Worldsize $50 \times 50 \times 50$, radius $0.5$.}
+The performance of a naieve many-particle system was evaluated and the results 
+are show in figure (\ref{quadraticComplexity}). The quadratic complexity of the 
+problem in function of the number of particles is clearly visible. To 
+ameliorate this result, we need to determine the ideal boxnumber. The 
+performance of a system in function of the number of partitions is given in 
+figure (\ref{fixedPartnum}). The performance peaks around the ideal number. We 
+have determined the optimum number of boxes for a large amount of particles and 
+graphed it in figure (\ref{idealNbox2}).
+
+\figOctave[htb]{idealNbox2}{Ideal number of boxes for given number of 
+particles.  Worldsize $50 \times 50 \times 50$, radius $0.5$.}
 \figOctave{linearComplexity}{Linear complexity with Ideal number of boxes. Worldsize $50 \times 50 \times 50$, radius $0.5$.}
 \figOctave{quadraticComplexity}{Quadratic complexity with one box. Worldsize $50 \times 50 \times 50$, radius $0.5$.}
 
