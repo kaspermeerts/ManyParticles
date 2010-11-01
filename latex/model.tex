@@ -1,51 +1,4 @@
 \section{Scientific model}
-\subsection{Speed distribution}
-
-The well-known \textbf{Maxwell-Boltzmann distribution} describes the molecular 
-speed for a monoatomic classical ideal gas in thermodynamic equilibrium.
-
-$$
-f(v)\dif v = \left( \frac{\beta m}{2 \pi} \right)^{3/2} 4 \pi v^2 e^{-\beta 
-\frac{mv^2}{2}} \dif v
-$$
-where $\beta$ is given by
-\begin{math}
-\beta \equiv \frac{1}{k_BT}
-\end{math}
-, $T$ is the temperature, $k_B$ is the Boltzmann constant and $m$ is the 
-molecular mass of the gas.
-
-In this section, we derive a similar expression for a two-dimensional gas.
-Consider a gas consisting of a single molecule of mass $m$ in a container in 
-contact with a heat bath of temperature $T$. The probability of the particle 
-being in a state with energy $E$ is given by the Boltzmann distribution.
-$$
-P(E) \dif E \propto e^{-\beta E}\dif E
-$$
-Since the energy of particle is only a function of the velocity $\vec{v}$, $E = 
-\frac{mv^2}{2}$, we can deduce
-$$
-P(\vec v)\dif{\vec v} \propto e^{- \beta \frac{m |\vec v|^2}{2}}\dif\vec v
-$$
-But we're interested in the speed distribution, not the velocity distribution.  
-For this, we use a substitution to polar coordinates
-$$
-\dif \vec{v} = \dif v_x\dif v_y = v\dif v\dif \theta
-$$
-where $v=|\vec{v}|$ is the speed. So
-$$
-f(v)\dif v\dif \theta \propto ve^{- \beta \frac{mv^2}{2}} \dif v\dif \theta
-$$
-Since the distribution is independent of the parameter $\theta$, we can 
-integrate over it and remove it from the equation.
-$$
-f(v)\dif v\propto ve^{- \beta \frac{mv^2}{2}} \dif v
-$$
-After normalisation we find the \textbf{Rayleigh distribution}
-$$
-f(v)\dif v=\beta m ve^{-\beta \frac{mv^2}{2}} \dif v
-$$
-
 \subsection{Collisions}
 
 The most basic short-range interaction that can be modeled in a many particle 
@@ -64,7 +17,7 @@ situation correctly. In the a priori case, our collision detection algorithm
 needs to interpolate the positions of various bodies to predict whether a 
 collision will happen or not.
 
-A priori algorithms are more stable and correcter, because the intersections of 
+A priori algorithms are more stable and correct, because the intersections of 
 bodies that need to be fixed in the a posteriori case are unphysical. However, 
 determining ahead of time when two bodies will collide is very difficult and it 
 requires the collision detection algorithm to know about the physics of moving 
@@ -150,19 +103,11 @@ collision.
 
 From this follows that
 $$
-q_2 = -q_1
-$$
-and
-$$
-p_2 = -p_1
+q_2 = -q_1 \qquad \textrm{and} \qquad p_2 = -p_1
 $$
 which we can fill in in the energy equation
 $$
-p_1^2 = q_1^2
-$$
-and
-$$
-p_2^2 = q_2^2
+p_1^2 = q_1^2 \qquad \textrm{and} \qquad p_2^2 = q_2^2
 $$
 The only possible solutions are $q_i = p_i$, that is no collision happened at 
 all, or $q_i = -p_i$. This means that the velocities of both bodies are 
@@ -189,7 +134,11 @@ each body do not change while the normal component is transformed according to
 the equations of an elastic collision. To get the normal vector, we simply 
 normalise the displacement vector between the bodies
 $$
-\vec{d} = \frac{\Delta\vec{r}}{|\Delta\vec{r}|}
+\vec{n} = \frac{\Delta\vec{r}}{|\Delta\vec{r}|}
+$$
+The normal component of the velocity is
+$$
+\vec{v_n} = \vec{v} \cdot \vec{n}
 $$
 
 \subsection{Spatial partitioning}

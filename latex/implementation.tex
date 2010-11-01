@@ -16,7 +16,7 @@ considerable overhead to the code. Lastly, we have a lot more experience
 writing C when compared to C++. Given the time constraints, it was more 
 natural to write in a language we knew better.
 
-For these reason, we decided to switch to C.  This conversion only took an 
+For these reasons, we decided to switch to C.  This conversion only took an 
 hour and the imperative paradigm seemed more fit to develop a performant 
 program in a reasonable amount of time.
 
@@ -49,15 +49,53 @@ struct Box {
 };
 \end{lstlisting}
 
+\subsection{Algorithms}
+
+To set up the initial configuration, the system is filled with the set amount 
+of particles. A particle is placed in a random location with a random velocity 
+from an isotropic distribution. The program then checks for collisions and if 
+necessary, moves the particle to another region. With this approach, we can 
+achieve a packing efficiency of $\sim$50\%, compared to the theoretical maximum 
+of $\sim$74\%.
+
+Each iteration, the simulation is advanced one timestep. This step consists of 
+first checking for collisions with other particles, then the particles are 
+checked for collisions with the walls and lastly every particle is moved in a 
+straight line according to its velocity. Any particle that moves over the 
+boundary of a partition is transfered to its new box.
+
+\begin{lstlisting}
+function stepWorld()
+	for each box:
+		for each particle in the box:
+			if (the particle collides)
+				handleCollision();
+	
+	for each box at the boundary:
+		for each particle in the box:
+			if (the particle collides with the wall)
+				bounceParticle();
+	
+	for each particle:
+		advanceParticle();
+		if (particle is not in original box)
+			transferParticle();
+\end{lstlisting}
+
+\subsection{Interface}
 The parameters for the system are given to the program by commandline 
 arguments. Methods to benchmark the performance of the program are also built 
 in the software. The scripts used to gather the data are in the same repository 
-as the code.
+as the code. Care was taken to only measure the time the processor spent 
+calculating and not the time the program took to finish, which is very 
+sensitive to external conditions.
 
 At the start of the program the world is filled with a given amount of 
 particles. The amount of time this procedure takes not added to the benchmark 
 results.  Then, either the system is rendered graphically for debugging 
 purposes, or it loops a set amount of iterations. Optionally, the positions 
 and velocities of each particle are printed. This way, we can plot a 
-distribution of the speed or demonstrate Brownian motion, convincing one 
-that our model is simulated physically correct.
+distribution of the speed or demonstrate Brownian motion, the results of which 
+are explained in the next section.
+
+

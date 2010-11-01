@@ -465,23 +465,6 @@ void stepWorld(void)
 			scale(&p->vel, dt, &dx);
 			add(&p->pos, &dx, &p->pos);
 
-			/*
-			if (p->pos.x >= worldSize)
-				p->pos.x -= worldSize;
-			else if (p->pos.x < 0)
-				p->pos.x += worldSize;
-			
-			if (p->pos.y >= worldSize)
-				p->pos.y -= worldSize;
-			else if (p->pos.y < 0)
-				p->pos.y += worldSize;
-
-			if (p->pos.z >= worldSize)
-				p->pos.z -= worldSize;
-			else if (p->pos.z < 0)
-				p->pos.z += worldSize;
-			*/
-
 			newBox = boxFromParticle(p);
 			
 			if (newBox != origBox)

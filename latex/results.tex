@@ -1,9 +1,43 @@
 \section{Results}
 \subsection{Physical results}
 
-The Maxwell-Boltzmann speed distribution describes the statistical distribution 
-of the speeds of particles in an ideal gas. One would expect any correct 
-physical model to satisfy this distribution, thus providing an important test 
-to our method of space partitioning.
+To validate the correctness of the software, we have tested some important 
+physical phenomena that are described by statiscal mechanics. We studied the 
+Maxwell-Boltzmann distribution and Brownian motion. Other interesting phenomena 
+include adsorption models, the Van der Waals corrections to the ideal gas law, 
+diffusion, heat conduction, phase transitions, thin film phenomena, etc...
+
+\subsubsection{Maxwell-Boltzmann distribution}
+The Maxwell-Boltzmann speed distribution describes the probability density of 
+the speed of a gas particle. The necessary temperature parameter was calculated 
+from our simulation using the equipartition theorem.
+$$
+E_{\textrm{avg, kin}} = \left< \frac{mv^2}{2} \right> = \frac{3k_BT}{2}
+$$
+With $m$ the mass of each particle and $k_B$ the Boltzmann constant. Both were 
+set to unity in our simulation. Thus
+$$
+T = \frac{\left< v^2 \right>}{3}
+$$
+The Maxwell-Boltzmann distribution follows
+$$
+f(v)\dif v = \left( \frac{\beta m}{2 \pi} \right)^{3/2} 4 \pi v^2
+\exp\left( -\beta \frac{mv^2}{2}\right) \dif v =
+\sqrt{ \frac{2}{\pi T^3} } v^2 \exp \left(-\frac{v^2}{2T}\right) \dif v
+$$
+
+The resulting simulated distribution is shown in figure (\ref{maxwell}) 
+together with the theoretical result. The results are clearly in perfect 
+agreement with the predicted result.
+\figOctave{maxwell}{Speed distribution of a simulation and the expected 
+theoretical distribution for a temperature of 1/9}
+
+\subsubsection{Brownian motion}
+With a small change to the software, a single massive, huge particle was 
+introduced in the system. Because of its relative size, space partitioning 
+could not be used and thus we had to check each particle explicitly. 
+
+The trajectory of the particle was saved and plotted in figure (XXXBROWNXXX).  
+Brownian motion is discernible in the path.
 
 
