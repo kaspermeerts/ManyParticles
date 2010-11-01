@@ -6,17 +6,24 @@ programming languages were C and C++.  Originally, we decided to implement the
 project in C++. It seemed to us that the clear distinction between the system, 
 a partition and a particle lent itself well to an object-oriented programming 
 language. Another advantage was the Standard Template Library (STL) which 
-provided us with an efficient doubly linked list.
+provided us with an efficient doubly linked list. Lastly, overloading the 
+addition and multilpication operators allowed for a natural expression of 
+vector operations.
 
-The nature of the problem, on the other hand, did not lend itself too well to 
-OOP. For this reason, we decided to switch to C. This conversion only took an 
+The nature of the problem, on the other hand, did not lend itself too well 
+to OOP. The principles of information hiding and encapsulation added a 
+considerable overhead to the code. Lastly, we have a lot more experience 
+writing C when compared to C++. Given the time constraints, it was more 
+natural to write in a language we knew better.
+
+For these reason, we decided to switch to C.  This conversion only took an 
 hour and the imperative paradigm seemed more fit to develop a performant 
 program in a reasonable amount of time.
 
 \subsection{Data structures}
 
-The project needed a lot of manipulation of vector quantities, like position 
-and velocity. For this we used the following straightforward C structure
+The project needs a lot of manipulation of vector quantities, like position 
+and velocity. For this we use the following straightforward C structure
 
 \begin{lstlisting}
 struct Vec3 {
@@ -50,7 +57,7 @@ as the code.
 At the start of the program the world is filled with a given amount of 
 particles. The amount of time this procedure takes not added to the benchmark 
 results.  Then, either the system is rendered graphically for debugging 
-purposes, or it loops a set amount of iterations. Optionally, the positions and 
-velocities of each particle are saved. This way, we can plot a distribution of 
-the speed or demonstrate Brownian motion, convincing one that our model is 
-simulated physically correct.
+purposes, or it loops a set amount of iterations. Optionally, the positions 
+and velocities of each particle are printed. This way, we can plot a 
+distribution of the speed or demonstrate Brownian motion, convincing one 
+that our model is simulated physically correct.
