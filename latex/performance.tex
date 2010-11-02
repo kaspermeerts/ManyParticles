@@ -1,17 +1,134 @@
 \section{Performance}
+\subsection{Testing platform}
 
-The performance of a naieve many-particle system was evaluated and the results 
-are show in figure (\ref{quadraticComplexity}). The quadratic complexity of the 
-problem in function of the number of particles is clearly visible. To 
-ameliorate this result, we need to determine the ideal boxnumber. The 
-performance of a system in function of the number of partitions is given in 
-figure (\ref{fixedPartnum}). The performance peaks around the ideal number. We 
-have determined the optimum number of boxes for a large amount of particles and 
-graphed it in figure (\ref{idealNbox2}).
+All tests were run on a laptop with an Intel Core2 Duo P8700 processor and 
+4\,GB of dual channel DDR2 800\,MHz RAM running Gentoo Linux on a 2.6.33 
+kernel with the kernel timer ticking at 1000\,Hz. All CPU time measurements 
+were accurate to 1\,ms.
 
-\figOctave[htb]{idealNbox2}{Ideal number of boxes for given number of 
+The code was compiled with version 4.4.5 of the GNU C Compiler using the 
+-O3 optimization flag and building for the native architecture. Debugging  
+options were omitted for the benchmark runs.
+
+
+\subsection{Naive approach}
+The performance of a naieve many-particle system was evaluated and the 
+results are show in figure \ref{quadraticComplexity}. This naive approach 
+was simulated by using just one box for the entire world. The quadratic 
+complexity of the problem in function of the number of particles is clearly 
+visible.
+
+\figOctave{quadraticComplexity}{Quadratic complexity with one box.  
+Worldsize $50 \times 50 \times 50$, radius $0.5$.}
+
+\figOctave{fixedPartnum}{Effect of number of boxes on performance, for a 
+fixed number of particles. Worldsize $50 \times 50 \times 50$, radius 
+$0.1$, 10000 particles.}
+
+
+\subsection{Space partitioning}
+To ameliorate the result above, the ideal number of boxes needs to be 
+determined.  The performance of a typical system in function of the number 
+of partitions is given in figure \ref{fixedPartnum}. The performance peaks 
+around the ideal number.  We have determined the optimum number of boxes 
+for a large amount of particles and graphed it in figure 
+	\ref{idealNboxR0p5}.
+
+In that test, each particle has a radius of $0.5$ and the worldsize was 
+kept constant at $50 \times 50 \times 50$. The number op particles ranged 
+from 0 to 10\,000. With the maximum number of particles, the world was 
+filled for about 4\%, expressed as the fraction of volume of all particles 
+with respect to the volume of the world.
+
+{\LARGE XXX XXX XXX hockeystick curve om aan te duiden max vullingsfractie 
+XXX XXX XXX}
+
+From the clear linear trend in this plot, it follows that --- for our 
+implementation  --- the ideal number of boxes is roughly ten times the 
+number of particles. This means that, on average, there will only be one 
+particle in every tenth box. Thus we can conclude that detecting a 
+collision is \emph{much} harder than dealing with the overhead of iterating 
+over the boxes.
+
+Another interesting features about this curve is the anomaly found at 
+around 1\,000 to 2\,000 particles. Here, the ideal number of boxes is 
+constant and takes the value 15\,625, or $25^3$. Note that this means that 
+every box has a size of exactly $2 \times 2 \times 2$. We believe that the 
+preference for this amount of boxes comes from the fact that a computer can 
+easily do arithmetic with numbers that are powers of two. Thus this anomaly 
+has more to do with the hardware running the algorithm than the algorithm 
+itself. Note that there also seems to be a plateau for around 8\,000 of 
+particles and above. This occurs at 125\,000 boxes, or exactly $50^3$. Each 
+box now has size $1 \times 1 \times 1$, and calculations (divisions, 
+multiplications) with the number 1 can be done quite efficiently indeed.
+
+Recall that for the maximum number of particles chosen, only 4\% of the 
+available space is filled. However, we could not extend the graph to the 
+right with more particles, since this would mean using boxes with a width 
+smaller than 1. Given that the chosen radius of a particle was $0.5$, this 
+would mean that two particles could collide that are not in adjacent boxes.  
+This collision would not get detected and the results will be useless.
+
+The only way to circumvent this is to use a smaller radius per particle.  
+This was done in figure \ref{idealNboxR0p1}, where a radius of 0.1 was 
+chosen.
+
+\figOctave[htb]{idealNboxR0p5}{Ideal number of boxes for given number of 
 particles.  Worldsize $50 \times 50 \times 50$, radius $0.5$.}
-\figOctave{linearComplexity}{Linear complexity with Ideal number of boxes. Worldsize $50 \times 50 \times 50$, radius $0.5$.}
-\figOctave{quadraticComplexity}{Quadratic complexity with one box. Worldsize $50 \times 50 \times 50$, radius $0.5$.}
+\figOctave[htb]{idealNboxR0p1}{Ideal number of boxes for given number of 
+particles.  Worldsize $50 \times 50 \times 50$, radius $0.1$.}
 
-\figOctave{fixedPartnum}{Effect of number of boxes on performance, for a fixed number of particles. Worldsize $50 \times 50 \times 50$, radius $0.1$, 10000 particles.}
+Note that the ideal case of $1 \times 1 \times 1$ sized boxes continues up 
+to 20\,000 particles (the plateau at $2 \times 2 \times 2$ sized boxes is 
+not visible anymore).
+
+Also note that the ideal number of boxes has changed from 10 per particle 
+in the previous graph to around 6.5 boxes per particle for large numbers of 
+particles. This is likely caused by the added memory demand for the extra 
+particles and boxes and is once again more of a limitation of the hardware 
+than of the algorithm. Indeed, modern computers make heavy use of caching 
+data from memory on fast caches near the processor. When the working set of 
+a program exeeds this available space, performance will decrease. Hence it 
+makes sense to limit the amount of memory accesses when dealing with a 
+large working set (a lot of particles). This translates into using less 
+boxes.
+
+Lastly, the actual time complexity is plotted for the various number of 
+particles. Each simulation was done using the ideal number of boxes 
+calculated above. For the case of particles with a radius 0.5, the results 
+are shown in figure \ref{linearComplexityR0p5}. It is clear that the time 
+complexity has gone from quadratic for the naive approach to linear when 
+using space partitioning.
+
+\figOctave{linearComplexityR0p5}{Linear complexity with ideal number of 
+boxes.  Worldsize $50 \times 50 \times 50$, radius $0.5$.}
+\figOctave{linearComplexityR0p1}{Deviation from linear complexity with 
+ideal number of boxes for large amount of particles.  Worldsize $50 \times 
+50 \times 50$, radius $0.1$.}
+
+In figure \ref{linearComplexityR0p1}, this graph gets extended for more 
+particles (while reducing the radius of the particles to 0.1). Note the 
+deviation from the linear trend. This can once again be ascribed to the 
+hardware running the algorithm. The formal derivation for the linear time 
+complexity assumed a constant fraction of particles in a box, $x$. We found 
+above that for a small amount of particles, the ideal $x$-value was about 
+1/10. For a large amount of particles, however, is value increased to about 
+1/6.5 for 100\,000 particles above. Thus this $x$ depends on the number of 
+particles and so the theoretically expected linear curve turns out slightly 
+superlinear in practise.
+
+
+\subsection{Conclusion}
+In theory, space partitioning allows us to reduce the time complexity of a 
+many-particles simulation from $O(n^2)$ to $O(n)$.
+
+In our example, the ideal number of boxes to maximize the number of 
+iterations per second turns out to be around 10 times more than the amount 
+of particles. Due to the nature of the underlaying hardware, this decreases 
+slightly as the memory demand grows larger. This also means that the ideal 
+complexity that can be achieved is slightly superlinear. It must be noted, 
+however, that this superlinear complexity is nowhere near as bad as the 
+quadratic complexity of the naive implementation.
+
+
+

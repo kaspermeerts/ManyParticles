@@ -9,27 +9,26 @@ npart = b(:,1);
 nbox = b(:,2) .^ 3;
 ips = b(:,3);
 
-secPerIter = 1 ./ ips;
+msPerIter = 1000 ./ ips;
 
-fit = polyfit(npart, secPerIter, 1);
-plot(npart, secPerIter, "o", npart, polyval(fit, npart));
-axis([0,1,0,4],'autox');
+plot(npart / 1000, msPerIter, "o");
+%axis([0,1,0,4],'autox');
 
-name='linearComplexity2';
+name='linearComplexityR0p1';
 ylabrule='0.3cm';
-xlab='Number of particles ($n$)';
-ylab='Seconds per iteration';
+xlab='Number of particles $\times$ 1000)';
+ylab='Milliseconds per iteration';
 width='700';
 height='500';
 makeGraph(name,destdir,relImgDir,xlab,ylab,ylabrule,width,height);
 
 
-plot(npart, nbox, "o");
+plot(npart / 1000, nbox / 1000, "o");
 
-name='idealNbox2';
+name='idealNboxR0p1';
 ylabrule='0.3cm';
-xlab='Number of particles ($n$)';
-ylab='Ideal number of boxes';
+xlab='Number of particles $\times$ 1000';
+ylab='Ideal number of boxes $\times$ 1000';
 width='700';
 height='500';
 makeGraph(name,destdir,relImgDir,xlab,ylab,ylabrule,width,height);
