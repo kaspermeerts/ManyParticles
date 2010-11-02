@@ -10,11 +10,11 @@ provided us with an efficient doubly linked list. Lastly, overloading the
 addition and multilpication operators allowed for a natural expression of 
 vector operations.
 
-The nature of the problem, on the other hand, did not lend itself too well 
-to OOP. The principles of information hiding and encapsulation added a 
-considerable overhead to the code. Lastly, we have a lot more experience 
-writing C when compared to C++. Given the time constraints, it was more 
-natural to write in a language we knew better.
+The nature of the problem, on the other hand, did not lend itself too well to 
+object-oriented programming. The principles of information hiding and 
+encapsulation added a considerable overhead to the code. Lastly, we have a lot 
+more experience writing C when compared to C++. Given the time constraints, it 
+was more natural to write in a language we knew better.
 
 For these reasons, we decided to switch to C.  This conversion only took an 
 hour and the imperative paradigm seemed more fit to develop a performant 
@@ -32,7 +32,8 @@ struct Vec3 {
 \end{lstlisting}
 
 A particle is represented by its position and velocity. The particles needs to 
-be contained in box so we store them in a circular doubly-linked list.
+be contained in a box so we store them in a circular doubly-linked list. This 
+enables us to easily iterate over all the particles in a box.
 \begin{lstlisting}
 struct Particle {
 	Vec3 pos;
@@ -54,9 +55,9 @@ struct Box {
 To set up the initial configuration, the system is filled with the set amount 
 of particles. A particle is placed in a random location with a random velocity 
 from an isotropic distribution. The program then checks for collisions and if 
-necessary, moves the particle to another region. With this approach, we can 
-achieve a packing efficiency of $\sim$50\%, compared to the theoretical maximum 
-of $\sim$74\%.
+necessary, tries another location until it has found an empty spot. With this 
+approach, we can achieve a packing efficiency of $\sim$50\%, compared to the 
+theoretical maximum of $\sim$74\%.
 
 Each iteration, the simulation is advanced one timestep. This step consists of 
 first checking for collisions with other particles, then the particles are 
