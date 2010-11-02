@@ -19,18 +19,38 @@ set to unity in our simulation. Thus
 $$
 T = \frac{\left< v^2 \right>}{3}
 $$
-The Maxwell-Boltzmann distribution follows
+The well known Maxwell-Boltzmann distribution reads
 $$
 f(v)\dif v = \left( \frac{\beta m}{2 \pi} \right)^{3/2} 4 \pi v^2
 \exp\left( -\beta \frac{mv^2}{2}\right) \dif v =
 \sqrt{ \frac{2}{\pi T^3} } v^2 \exp \left(-\frac{v^2}{2T}\right) \dif v
 $$
+with T given in function of the expectation of the squared velocity above.
 
-The resulting simulated distribution is shown in figure \ref{maxwell} together 
-with the theoretical result. The results are clearly in perfect agreement with 
-the predicted result.
+The velocity of our particles got initialized as a vector of fixed length 
+1, pointing in a random direction. Thus, the inital speed distribution has 
+the shape of a delta distribution around the speed 1. Through collisions 
+between the particles, the particles reach thermal equilibrium. Whilst 
+doing so, the sharp peak in the speed distribution relaxes to approximate 
+the Maxwell-Boltzmann distribution.
+
 \figOctave{maxwell}{Speed distribution of a simulation and the expected 
-theoretical distribution for a temperature of 1/9}
+theoretical distribution for a temperature of 1/3}
+
+The resulting simulated distribution is shown in figure \ref{maxwell} 
+together with the theoretical result. The parameters used were: a worldsize 
+of $60 \times 60 \times 60$, 8000 particles with radius 0.2 and a 
+relaxation time of 15\,000 iterations with timestep 0.05.
+
+The temperature of the theoretical curve was obtained from the formula 
+above, using that the temperature at the beginning\footnote{Note that it's 
+not quite appropriate to talk about a temperature in this case. We aren't 
+in thermal equilibrium yet and there is no entropy to calculate $\partial E 
+/ \partial S$. Nevertheless, using the equipartitiontheorem to define the 
+temperature works just fine.}
+was given by $\left<v^2\right>/3$, in our case 1/3.
+
+The results are clearly in perfect agreement with the predicted result.
 
 \subsubsection{Brownian motion}
 With a small change to the software, a single massive, huge particle was 
@@ -50,13 +70,22 @@ Brownian motion is discernible in the path.
 
 Heat conduction is another phenomenon that can be studied. No results are shown 
 in this article but we propose a method how one can implement this using the 
-software. This simulation is based on heat conduction by electrons in a metal.
+software.
 
-We propose to give two opposite walls a different temperature.  When a particle 
-collides with a wall, it gets a random mixture of its own momentum and the 
-momentum it would have had if it had the same temperature as the wall.  
-Throughout the system, a regular grid of stationary particles is set up. These 
-particles can exchange kinetic energy with the moving particles after a 
-collision. The stationary particle stores its kinetic energy in a vibration 
-mode. This gives an idea of the temperature distribution of the system.
+The first proposal models heat conduction in a gas. We propose to give two 
+opposite walls a different temperature. When a particle collides with a 
+wall, the normal component with respect to the wall gets mixed randomly 
+with the momentum it would have if it had the same temperature as the wall.  
 
+This is enough to model heat transfer from one wall to another. With a 
+sufficiently dense gas, and a sufficient distance between the walls, it is 
+even possible to graph a temperature profile by considering the average 
+energy of the particles in function of their distance to the walls.
+
+A second proposal models heat conduction by electrons in a metal. The 
+setting is the same as the previous example, but with an additional regular 
+grid of stationary particles that fills the world. These particles can 
+exchange kinetic energy with the moving particles after a collision. The 
+stationary particle stores its kinetic energy in a vibration mode. This 
+gives an idea of the temperature distribution of the system and doesn't 
+require a very dense gas.
