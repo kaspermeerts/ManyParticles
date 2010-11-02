@@ -167,11 +167,13 @@ int main(int argc, char **argv)
 	int i;
 	struct rusage startTime, endTime;
 	double timeDiff;
+	struct timeval tv;
 
 
 	parseArguments(argc, argv);
 
-	srand(time(NULL));
+	gettimeofday(&tv, NULL);
+	srand(tv.tv_sec ^ tv.tv_usec);
 
 	allocWorld();
 	fillWorld();
