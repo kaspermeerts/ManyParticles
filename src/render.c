@@ -1,6 +1,7 @@
 #include <SDL/SDL.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <math.h>
 #include "main.h"
 #include "render.h"
 #include "system.h"
@@ -12,10 +13,21 @@ SDL_Surface *surface;
 
 GLfloat light_pos[] = {  3.0, 1.0, 1.0, 0.0 };
 GLfloat light_diff[] = { 1.0, 1.0, 1.0, 0.0 };
-GLfloat light_spec[] = { 1.0, 0.0, 0.0, 1.0 };
-GLfloat light_ambi[] = { 1.0, 1.0, 1.0, 1.0 };
+GLfloat light_spec[] = { 0.0, 0.0, 0.0, 0.0 };
+GLfloat light_ambi[] = { 0.8, 0.8, 0.8, 0.0 };
+
+static int numVertices;
+static int numIndices;
+
+typedef struct {
+	GLfloat x, y, z;
+} Vertex3;
+
+static Vertex3 *sphereVertex;
+static GLushort *sphereIndex;
 
 static void renderSphere(float x, float y, float z, float r);
+static void createSphere(int stacks, int slices);
 
 int initRender(void)
 {
@@ -52,14 +64,22 @@ int initRender(void)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glShadeModel(GL_SMOOTH);
+	glEnable(GL_NORMALIZE);
 
-	glLightfv( GL_LIGHT0, GL_POSITION, light_pos );
-	glLightfv( GL_LIGHT0, GL_DIFFUSE, light_diff );
-	glLightfv( GL_LIGHT0, GL_SPECULAR, light_spec );
-	glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambi );
+	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diff);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_spec);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambi);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 
-	glClearColor(0.0, 0.0, 0.2, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
+	createSphere(16, 16);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glVertexPointer(3, GL_FLOAT, sizeof(Vertex3), sphereVertex);
+	glNormalPointer(GL_FLOAT, sizeof(Vertex3), sphereVertex);
+
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(40, SCREEN_W/(double)SCREEN_H, s/2, 4*s);
@@ -80,13 +100,12 @@ int render(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	theta += 0.20;
+	theta += 0.10;
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0, 0, -s*2.5);
 	glRotatef(theta, 0, 1, 0);
-
 
 	glColor3f(0.0, 1.0, 0.0);
 	glBegin(GL_LINE_LOOP);
@@ -108,21 +127,121 @@ int render(void)
 			config.radiusHuge);
 #endif
 	glColor3f(0.0, 0.7, 0.0);
-	/*glPointSize(2);*/
-	/*glBegin(GL_POINTS);*/
+	glPointSize(2);
 	for (i = 0; i < config.numParticles; i++)
 	{
 		Particle *p = &world.parts[i];
+
+#if 1
+		glPushMatrix();
+			glTranslatef(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2);
+			glScalef(config.radius, config.radius, config.radius);
+			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, sphereIndex);
+		glPopMatrix();
+#else
 		renderSphere(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2, 
 				config.radius);
-		/*glVertex3f(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2);*/
+#endif
 		glColor3f(1.0, 0.0, 0.0);
 	}
-	/*glEnd();*/
 
+	
 	SDL_GL_SwapBuffers();
 
 	return 0;
+}
+
+static void createSphere(int stacks, int slices)
+{
+	int i, j, k;
+	float x, y, z;
+	float r;
+
+	slices *= 2;
+
+	/* Plus two for the poles */
+	numVertices = (stacks - 1) * slices + 2;
+	sphereVertex = calloc(numVertices, sizeof(Vertex3));
+
+	/* All but the top and bottom stack */
+	for (i = 1; i < stacks; i++)
+	{
+		float phi = M_PI * i / (float) stacks - 2*M_PI;
+		
+		z = cos(phi);
+		r = sqrt(1 - z*z);
+
+		for (j = 0; j < slices; j++)
+		{
+			float theta = 2*M_PI*j/(float) slices;
+			x = r * sin(theta);
+			y = r * cos(theta);
+
+			sphereVertex[(i-1) * slices + j + 1].x = x;
+			sphereVertex[(i-1) * slices + j + 1].y = y;
+			sphereVertex[(i-1) * slices + j + 1].z = z;
+		}
+	}
+
+	/* Top and bottom */
+	sphereVertex[0].x = 0;
+	sphereVertex[0].y = 0;
+	sphereVertex[0].z = 1;
+
+	sphereVertex[numVertices-1].x = 0;
+	sphereVertex[numVertices-1].y = 0;
+	sphereVertex[numVertices-1].z = -1;
+
+	numIndices = (stacks - 1) * slices * 6;
+	sphereIndex = calloc(numIndices, sizeof(GLushort));
+
+	k = 0;
+
+	for (i = 1; i < slices; i++)
+	{
+		sphereIndex[k++] = 0;
+		sphereIndex[k++] = i;
+		sphereIndex[k++] = i+1;
+	}
+	sphereIndex[k++] = 0;
+	sphereIndex[k++] = 1;
+	sphereIndex[k++] = slices;
+	
+	for (i = 0; i < slices - 1; i++)
+	{
+		sphereIndex[k++] = numVertices - 1;
+		sphereIndex[k++] = (numVertices - 1 - slices) + i;
+		sphereIndex[k++] = (numVertices - 1 - slices) + i + 1;
+	}
+	sphereIndex[k++] = numVertices - 1;
+	sphereIndex[k++] = numVertices - 1 - 1;
+	sphereIndex[k++] = numVertices - 1 - slices + 0;
+
+	for (i = 1; i < stacks - 1; i++)
+	{
+		int base = 1 + (i - 1) * slices;
+
+		for (j = 0; j < slices - 1; j++)
+		{
+			sphereIndex[k++] = base + j;
+			sphereIndex[k++] = base + slices + j;
+			sphereIndex[k++] = base + slices + j + 1;
+
+			sphereIndex[k++] = base + j;
+			sphereIndex[k++] = base + j + 1;
+			sphereIndex[k++] = base + slices + j + 1;
+		}
+
+		sphereIndex[k++] = base;
+		sphereIndex[k++] = base + slices - 1;
+		sphereIndex[k++] = base + slices;
+
+		sphereIndex[k++] = base + slices - 1;
+		sphereIndex[k++] = base + slices;
+		sphereIndex[k++] = base + slices + slices - 1;
+	}
+
+	return;
 }
 
 static void renderSphere(float x, float y, float z, float r)
