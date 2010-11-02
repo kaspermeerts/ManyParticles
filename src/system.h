@@ -31,6 +31,7 @@ typedef struct config
 	bool dump;
 	bool bench;
 	double maxTime;
+	bool dumpFillFails;
 
 	/* The same for every dimension */
 	float boxSize;

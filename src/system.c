@@ -252,6 +252,7 @@ void fillWorld()
 	Particle *ps = world.parts;
 	float v, u, phi;
 	float worldSize = config.numBox * config.boxSize;
+	long fillFails = 0;
 
 #ifdef BROWNIAN
 	huge.pos.x = worldSize / 2;
@@ -279,7 +280,9 @@ void fillWorld()
 					((RAND_MAX >> 9) + 1U);
 			ps[i].pos.z = (rand() >> 9) * worldSize / 
 					((RAND_MAX >> 9) + 1U);
+			fillFails++;
 		} while (collides(&ps[i]));
+		fillFails--;
 
 		/* Sphere surface point picking is trickier than might seem */
 		phi = 2 * M_PI * rand() / (double) (RAND_MAX + 1U);
@@ -294,23 +297,8 @@ void fillWorld()
 		addToBox(&ps[i], box);
 	}
 	
-	/*
-	ps[0].pos.x = 0.2;
-	ps[0].pos.y = 0.5;
-	ps[0].pos.z = 0.5;
-
-	ps[0].vel.x = 0.20;
-	ps[0].vel.y = 0.05;
-	ps[0].vel.z = 0.0;
-
-	ps[1].pos.x = 0.8;
-	ps[1].pos.y = 0.5;
-	ps[1].pos.z = 0.5;
-
-	ps[1].vel.x = 0.00;
-	ps[1].vel.y = 0.0;
-	ps[1].vel.z = 0.0;
-	*/
+	if (config.dumpFillFails)
+		printf("%ld\n", fillFails);
 }
 
 void freeWorld()

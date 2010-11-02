@@ -75,9 +75,10 @@ static void parseArguments(int argc, char **argv)
 	config.iterations = 100;
 	config.timeStep = 0.01;
 	config.maxTime = -1;
+	config.dumpFillFails = false;
 
 
-	while ((c = getopt(argc, argv, ":i:t:rdb:")) != -1)
+	while ((c = getopt(argc, argv, ":i:t:rdb:f")) != -1)
 	{
 		switch (c)
 		{
@@ -103,6 +104,9 @@ static void parseArguments(int argc, char **argv)
 			if (optarg != NULL)
 				config.maxTime = atof(optarg) / 1000;
 			break;
+		case 'f':
+			config.dumpFillFails = true;
+			break;
 		case ':':
 			die("Option -%c requires an argument\n", optopt);
 			break;
@@ -120,8 +124,13 @@ static void parseArguments(int argc, char **argv)
 
 	if (argc < 4)
 		die("Usage: main <box size> <box number> <particle number> "
-					"<radius>\n"
-		    "            [-t timestep] [-i iterations] [-b [max milisec]]\n");
+					"<radius> [flags]\n"
+		    "Flags:\n" 
+		    " -t <num>  Use timesteps of <num>\n"
+		    " -i <num>  Iterate for <num> iterations>\n"
+		    " -b <num>  Benchmark for at least <num> miliseconds\n"
+		    " -f        Dump amount of failed fills\n"
+		    " -r        Render\n");
 
 	config.boxSize = atof(argv[0]);
 	config.numBox = atoi(argv[1]);
