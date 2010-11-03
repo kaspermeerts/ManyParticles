@@ -188,11 +188,13 @@ many-particles simulation from $O(n^2)$ to $O(n)$.
 
 In our example, the ideal number of boxes to maximize the number of 
 iterations per second turns out to be around 10 times more than the amount 
-of particles. Due to the nature of the underlaying hardware, this decreases 
+of particles. Due to the nature of the underlaying hardware, this varies 
 slightly as the memory demand grows larger. This also means that the ideal 
-complexity that can be achieved is slightly superlinear. It must be noted, 
-however, that this superlinear complexity is nowhere near as bad as the 
-quadratic complexity of the naive implementation.
+complexity that can be achieved in practice is slightly superlinear for 
+some intermediate regimes.  It must be noted, however, that this 
+superlinear complexity is nowhere near as bad as the quadratic complexity 
+of the naive implementation, and that it  turns linear again for large 
+numbers of particlces.
 
 
 
