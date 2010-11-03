@@ -2,8 +2,8 @@ addpath('../../../scripts/octave');
 destdir = "../../../../latex/images";
 relImgDir = "images";
 
-b = load("ws50r0.1-1.csv");
-b = [b;load("ws50r0.1-2.csv")];
+b = load("ws50r0.1-1");
+b = [b;load("ws50r0.1-2")];
 
 npart = b(:,1);
 nbox = b(:,2) .^ 3;
@@ -21,6 +21,7 @@ ylab='Milliseconds per iteration';
 width='700';
 height='500';
 makeGraph(name,destdir,relImgDir,xlab,ylab,ylabrule,width,height);
+
 
 
 plot(npart / 1000, nbox / 1000, "o");
