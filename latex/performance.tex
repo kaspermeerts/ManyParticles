@@ -113,17 +113,18 @@ The only way to circumvent this is to use a smaller radius per particle.
 This was done in figure \ref{idealNboxR0p1}, where a radius of 0.1 was 
 chosen.
 
-\figOctave[htb]{idealNboxR0p5}{Ideal number of boxes for given number of 
-particles.  Worldsize $50 \times 50 \times 50$, radius $0.5$.}
+\figOctave[htb]{idealNboxR0p5}{Ideal number of boxes for given (small) 
+number of particles.  Worldsize $50 \times 50 \times 50$, radius $0.5$.}
+
 \figOctave[htb]{idealNboxR0p1}{Ideal number of boxes for given number of 
 particles.  Worldsize $50 \times 50 \times 50$, radius $0.1$.}
 
 Note that the ideal case of $1 \times 1 \times 1$ sized boxes continues up 
 to 20\,000 particles (the plateau at $2 \times 2 \times 2$ sized boxes is 
-not visible anymore).
+not visible anymore in that figure).
 
 Also note that the ideal number of boxes has changed from 10 per particle 
-in the previous graph to around 6.5 boxes per particle for large numbers of 
+in the previous graph to around 7 boxes per particle for large numbers of 
 particles. This is likely caused by the added memory demand for the extra 
 particles and boxes and is once again more of a limitation of the hardware 
 than of the algorithm. Indeed, modern computers make heavy use of caching 
@@ -132,6 +133,17 @@ a program exeeds this available space, performance will decrease. Hence it
 makes sense to limit the amount of memory accesses when dealing with a 
 large working set (a lot of particles). This translates into using less 
 boxes.
+
+The results for an even greater amount of particles are plotted in figure 
+\ref{idealNboxR0p1-1M}. The particle number reaches 1.2 million. This would 
+be completely intractable using a naive approach. Once again, a plateau is 
+visible, this time when using $200 \times 200 \times 200$ boxes. Also, the 
+average number of boxes per particle seems to have stabilized in the 
+vicinity of 10 again.
+
+\figOctave[htb]{idealNboxR0p1-1M}{Ideal number of boxes for given (large) 
+number of particles.  Worldsize $50 \times 50 \times 50$, radius $0.1$.}
+
 
 Lastly, the actual time complexity is plotted for the various number of 
 particles. Each simulation was done using the ideal number of boxes 
@@ -142,9 +154,11 @@ using space partitioning.
 
 \figOctave{linearComplexityR0p5}{Linear complexity with ideal number of 
 boxes.  Worldsize $50 \times 50 \times 50$, radius $0.5$.}
+
 \figOctave{linearComplexityR0p1}{Deviation from linear complexity with 
 ideal number of boxes for large amount of particles.  Worldsize $50 \times 
 50 \times 50$, radius $0.1$.}
+
 
 In figure \ref{linearComplexityR0p1}, this graph gets extended for more 
 particles (while reducing the radius of the particles to 0.1). Note the 
@@ -153,9 +167,19 @@ hardware running the algorithm. The formal derivation for the linear time
 complexity assumed a constant fraction of particles in a box, $x$. We found 
 above that for a small amount of particles, the ideal $x$-value was about 
 1/10. For a large amount of particles, however, is value increased to about 
-1/6.5 for 100\,000 particles above. Thus this $x$ depends on the number of 
+1/7 for 100\,000 particles above. Thus this $x$ depends on the number of 
 particles and so the theoretically expected linear curve turns out slightly 
 superlinear in practise.
+
+Going to even higer particle numbers, this anomaly vanishes again, as seen 
+in figure \ref{linearComplexityR0p1-1M}. Note that at the point of 1.2 
+\emph{million} particles, every iteration still onli takes about 1 second 
+on the testing machine.
+
+\figOctave{linearComplexityR0p1-1M}{Stabilising of linear complexity with 
+ideal number of boxes for \emph{very} large amount of particles.  Worldsize 
+$50 \times 50 \times 50$, radius $0.1$.}
+
 
 
 \subsection{Conclusion}
