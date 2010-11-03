@@ -1,23 +1,23 @@
 \section{Scientific model}
 \subsection{Collisions}
 
-The most basic short-range interaction that can be modeled in a many 
-particle system is the elastic collision between hard spheres (3D) or disks 
-(2D). It is important that this interaction is not only addressed 
-correctly, but also efficiently. Therefore, one wants to avoid calculating 
-computationally expensive trigonometric functions like sine and cosine and 
-try to keep square roots to a minimum.
+The most basic short-range interaction that can be modeled in a many-particle 
+system is the elastic collision between hard spheres (3D) or disks (2D). It is 
+important that this interaction is not only addressed correctly, but also 
+efficiently. Therefore, one wants to avoid calculating computationally 
+expensive trigonometric functions like sine and cosine and try to keep square 
+roots to a minimum.
 
 Collision simulations function in basically two ways, the collisions can be 
 detected before they happen, \emph{a priori}, or afterwards, \emph{a 
 posteriori}.
 
 In the a posteriori case, the simulation gets advanced by a small time step 
-each iteration. If a collisions has happened, the simulation gets rolled 
-back a short while to the exact moment of impact. The collision then gets 
-computed and the situation gets restored correctly. In the a priori case, 
-the collision detection algorithm needs to interpolate the positions of 
-various bodies to predict whether a collision will happen or not.
+each iteration. If a collision took place, the simulation gets rolled back a 
+short while to the exact moment of impact. The collision then gets handled and 
+the situation is restored correctly. In the a priori case, the collision 
+detection algorithm needs to interpolate the positions of various bodies to 
+predict whether a collision will happen or not.
 
 A priori algorithms are more stable and correct, because the intersections of 
 bodies that need to be fixed in the a posteriori case are unphysical. However, 
@@ -25,9 +25,10 @@ determining ahead of time when two bodies will collide is very difficult and it
 requires the collision detection algorithm to know about the physics of 
 moving bodies. Therefore we opted for the other method.
 
+\subsubsection{Rewinding time}
 Since we detect collisions a posteriori, we need to restore the situation to 
-before the collision. Thus, we need to rewind each pair of intersecting spheres 
-to before the collision. Assuming there is no external forcefield, the 
+the exact time the collision took place. This entails moving each pair of 
+intersecting sphere back in time. Assuming there is no external forcefield, the 
 particles are in a state of uniform rectilinear motion. The equation we need to 
 solve for the time $t$ is
 $$
@@ -40,7 +41,7 @@ $$
 \Delta\vec{r} + \Delta\vec{v} \Delta t | = R_1 + R_2
 $$
 with $\Delta\vec{r}$ and $\Delta\vec{v}$ the particles' relative position and 
-motion and $\Delta t$ the sought after time difference. Squaring both sides, we 
+motion and $\Delta t$ the sought-after time difference. Squaring both sides, we 
 find
 $$
 |\Delta\vec{r}|^2 + 2\Delta\vec{v} \cdot \Delta\vec{r}\Delta t + 
@@ -68,14 +69,14 @@ before the collision. Now, we need to handle the collision itself.
 \subsubsection{One-dimensional elastic collision}
 
 Consider two particles denoted by subscripts 1 and 2.  Let $m_i$ be the masses, 
-$v_c$ be the the velocity of the center of mass (COM) frame, $v_i$ the 
-velocities before the collision, $v'_i$ the velocities before collision in the 
-COM frame, $w_i$ the velocities after the collision and $w'_i$ the velocities 
-after collision in the COM frame.  We assume the speed of both bodies is 
+$v_c$ the the velocity of the center of mass (COM) frame, $v_i$ the velocities 
+before the collision, $v'_i$ the velocities before the collision in the COM 
+frame, $w_i$ the velocities after the collision and $w'_i$ the velocities after 
+the collision in the COM frame.  We assume the speed of both bodies is 
 non-relativistic. 
 
 To considerably simplify the equations, we are going to transform to the 
-intertial frame of the center of mass (COM). The COM velocity is
+inertial frame of the center of mass (COM). The COM velocity is
 $$
 v_c = \frac{m_1 v_1 + m_2 v_2}{m_1 + m_2}
 $$
@@ -119,7 +120,7 @@ $$
 w'_i = -v'_i
 $$
 
-Thus we can derive the velocities in the original frame of reference
+Thus we can derive the new velocities in the original frame of reference
 $$
 w_1 = w'_1 + v_c = \frac{v_1(m_1-m_2) + 2m_2u_2}{m_1+m_2}
 $$
@@ -152,9 +153,9 @@ particles dependent on their mutual distance. Of considerable interest are
 short-range interactions, for example when the particles represent atoms. Since 
 a particle could hypothetically interact with every other particle, each pair 
 needs to be tested separately. Thus $n(n-1)/2$ interactions will be considered, 
-with $n$ the number of particles. Most of these are useless because the 
+with $n$ the number of particles. Most of these are superfluous because the 
 particles are too far apart. This $O(n^2)$ complexity is undesirable for 
-performance reasons. An often used technique is called \textbf{spatial 
+performance reasons.  An often used technique is called \textbf{spatial 
 partitioning}.
 
 By splitting the world into smaller partitions, \emph{boxes}, one only has to 

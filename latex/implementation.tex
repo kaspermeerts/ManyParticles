@@ -55,15 +55,21 @@ struct Box {
 To set up the initial configuration, the system is filled with the set amount 
 of particles. A particle is placed in a random location with a random velocity 
 from an isotropic distribution. The program then checks for collisions and if 
-necessary, tries another location until it has found an empty spot. With this 
-approach, we can achieve a packing efficiency of $\sim$50\%, compared to the 
-theoretical maximum of $\sim$74\%.
+necessary, tries another location until it has found an empty spot.
 
 Each iteration, the simulation is advanced one timestep. This step consists of 
 first checking for collisions with other particles, then the particles are 
 checked for collisions with the walls and lastly every particle is moved in a 
 straight line according to its velocity. Any particle that moves over the 
 boundary of a partition is transfered to its new box.
+
+To find out whether a particle intersects another particle, we test it against 
+every other particle in the same box. As this is the common case, this step is 
+performed first. If this search yields nothing, we check against particle in 
+neighbouring boxes. A possible, unimplemented performance improvement would be 
+only checking the boxes that intersect the particle. It is important that the 
+box size is at least two times the radius of each particle for we could miss 
+some collisions otherwise.
 
 \begin{lstlisting}
 function stepWorld()
@@ -92,11 +98,11 @@ calculating and not the time the program took to finish, which is very
 sensitive to external conditions.
 
 At the start of the program the world is filled with a given amount of 
-particles. The amount of time this procedure takes not added to the benchmark 
-results.  Then, either the system is rendered graphically for debugging 
-purposes, or it loops a set amount of iterations. Optionally, the positions 
-and velocities of each particle are printed. This way, we can plot a 
-distribution of the speed or demonstrate Brownian motion, the results of which 
-are explained in the next section.
+particles. This overhead is not included in the benchmark results. Then, either 
+the system is rendered graphically for debugging purposes, or it loops a set 
+amount of iterations.  Optionally, the positions and velocities of each 
+particle are printed. This way, we can plot a distribution of the speed or 
+demonstrate Brownian motion, the results of which are explained in the next 
+section.
 
 

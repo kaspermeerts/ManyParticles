@@ -28,7 +28,7 @@ goes to waste.
 
 The problem of trying to fit as many spheres as possible in a fixed 
 container is knows as \emph{sphere packing}. It is proven\cite{idealPacking}
-that the most ideal sphere packing has a volume fraciton of $\pi / \sqrt{18}
+that the most ideal sphere packing has a volume fraction of $\pi / \sqrt{18}
 \approx 0.74$. This happens when the spheres are placed on a regular grid
 called  ``face centered cubic''. Our implementation, however, fills the 
 world in a random, irregular way. This is a closely related problem known 
@@ -45,19 +45,15 @@ Our algorithm did no such ``shaking'', and could only fill the world up to
 a density of 52\%. A graph of the failed particle placements w.r.t the 
 packing density is given in figure \ref{fillJcurve}. Notice the 
 asymptotical behaviour near the 52\% density. Above this density, the 
-algorithm will loop forever, trying to insert a particle in a random 
-position, but never succeed in doing so.
-
-
-
-
+algorithm will loop forever, trying to insert a particle in a random position, 
+but never succeeding in doing so.
 
 \subsection{Collisions: naive approach}
-The performance of a naieve many-particle system with simple collisions was 
-evaluated and the results are show in figure \ref{quadraticComplexity}.  
-This naive approach was simulated by using just one box for the entire 
-world. The quadratic complexity of the problem in function of the number of 
-particles is clearly visible.
+The performance of a naive many-particle system with simple collisions was 
+evaluated and the results are show in figure \ref{quadraticComplexity}.  This 
+naive approach was simulated by using just one box for the entire world. The 
+quadratic complexity of the problem in function of the number of particles is 
+clearly visible.
 
 \figOctave{quadraticComplexity}{Quadratic complexity with one box.  
 Worldsize $50 \times 50 \times 50$, radius $0.5$.}
@@ -65,12 +61,11 @@ Worldsize $50 \times 50 \times 50$, radius $0.5$.}
 
 
 \subsection{Space partitioning}
-To ameliorate the result above, the ideal number of boxes needs to be 
-determined.  The performance of a typical system in function of the number 
-of partitions is given in figure \ref{fixedPartnum}. The performance peaks 
-around the ideal number.  We have determined the optimum number of boxes 
-for a large amount of particles and graphed it in figure 
-	\ref{idealNboxR0p5}.
+To ameliorate the above result, the ideal number of boxes needs to be 
+determined.  The performance of a typical system in function of the number of 
+partitions is given in figure \ref{fixedPartnum}. The performance peaks around 
+the ideal number.  We have determined the optimum number of boxes for a large 
+amount of particles and graphed it in figure \ref{idealNboxR0p5}.
 
 \figOctave{fixedPartnum}{Effect of number of boxes on performance, for a 
 fixed number of particles. Worldsize $50 \times 50 \times 50$, radius 
@@ -97,17 +92,17 @@ every box has a size of exactly $2 \times 2 \times 2$. We believe that the
 preference for this amount of boxes comes from the fact that a computer can 
 easily do arithmetic with numbers that are powers of two. Thus this anomaly 
 has more to do with the hardware running the algorithm than the algorithm 
-itself. Note that there also seems to be a plateau for around 8\,000 of 
-particles and above. This occurs at 125\,000 boxes, or exactly $50^3$. Each 
-box now has size $1 \times 1 \times 1$, and calculations (divisions, 
-multiplications) with the number 1 can be done quite efficiently indeed.
+itself. Note that there also seems to be a plateau around 8\,000 of particles 
+and above. This occurs at 125\,000 boxes, or exactly $50^3$. Each box now has 
+size $1 \times 1 \times 1$, and calculations (divisions, multiplications) with 
+the number 1 can be done quite efficiently indeed.
 
 Recall that for the maximum number of particles chosen, only 4\% of the 
 available space is filled. However, we could not extend the graph to the 
 right with more particles, since this would mean using boxes with a width 
 smaller than 1. Given that the chosen radius of a particle was $0.5$, this 
 would mean that two particles could collide that are not in adjacent boxes.  
-This collision would not get detected and the results will be useless.
+This collision would not get detected and the results would be useless.
 
 The only way to circumvent this is to use a smaller radius per particle.  
 This was done in figure \ref{idealNboxR0p1}, where a radius of 0.1 was 
@@ -173,8 +168,8 @@ superlinear in practise.
 
 Going to even higer particle numbers, this anomaly vanishes again, as seen 
 in figure \ref{linearComplexityR0p1-1M}. Note that at the point of 1.2 
-\emph{million} particles, every iteration still onli takes about 1 second 
-on the testing machine.
+\emph{million} particles, every iteration still only takes about 1 second on 
+the testing machine.
 
 \figOctave{linearComplexityR0p1-1M}{Stabilising of linear complexity with 
 ideal number of boxes for \emph{very} large amount of particles.  Worldsize 
@@ -192,9 +187,9 @@ of particles. Due to the nature of the underlaying hardware, this varies
 slightly as the memory demand grows larger. This also means that the ideal 
 complexity that can be achieved in practice is slightly superlinear for 
 some intermediate regimes.  It must be noted, however, that this 
-superlinear complexity is nowhere near as bad as the quadratic complexity 
-of the naive implementation, and that it  turns linear again for large 
-numbers of particlces.
+superlinear complexity is nowhere near as bad as the quadratic complexity of 
+the naive implementation, and that it turns linear again for large numbers of 
+particles.
 
 
 
