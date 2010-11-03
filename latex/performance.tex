@@ -1,3 +1,5 @@
+% vim: ft=tex
+
 \section{Performance}
 \subsection{Testing platform}
 
@@ -11,19 +13,55 @@ The code was compiled with version 4.4.5 of the GNU C Compiler using the
 options were omitted for the benchmark runs.
 
 
-\subsection{Naive approach}
-The performance of a naieve many-particle system was evaluated and the 
-results are show in figure \ref{quadraticComplexity}. This naive approach 
-was simulated by using just one box for the entire world. The quadratic 
-complexity of the problem in function of the number of particles is clearly 
-visible.
+\subsection{Filling the world}
+Our algorithm initializes the world by trying to insert a particle in a 
+random position. If this particle collides with an existing particle, a new 
+random location is tried, otherwise the particle is added.
+
+Of course, there exists a limit to the amount of spheres that can be packed 
+in a container. If the total volume of the spheres exeeds the available 
+volume, it is of course impossible to place them in this container.  
+Moreover, even if the total volume of the spheres is less than the 
+available volume, there is no guarantee that the spheres will fit. Because 
+of the round shape of the spheres, there will always be some space that 
+goes to waste.
+
+The problem of trying to fit as many spheres as possible in a fixed 
+container is knows as \emph{sphere packing}. It is proven\cite{idealPacking}
+that the most ideal sphere packing has a volume fraciton of $\pi / \sqrt{18}
+\approx 0.74$. This happens when the spheres are placed on a regular grid
+called  ``face centered cubic''. Our implementation, however, fills the 
+world in a random, irregular way. This is a closely related problem known 
+as \emph{random close packing}. Another theorem\cite{randomPacking} states 
+that the packing in such a random way cannot exeed approximately 63\%. This 
+is the absolute maximum, assuming the randomly placed particles are 
+``shaken'' as much as possible to let them settle down and reach the lowest 
+possible volume.
+
+\figOctave{fillJcurve}{Fraction of failed particle placements w.r.t.  
+packing density. Note the logarithmic scale on the vertical axis.}
+
+Our algorithm did no such ``shaking'', and could only fill the world up to 
+a density of 52\%. A graph of the failed particle placements w.r.t the 
+packing density is given in figure \ref{fillJcurve}. Notice the 
+asymptotical behaviour near the 52\% density. Above this density, the 
+algorithm will loop forever, trying to insert a particle in a random 
+position, but never succeed in doing so.
+
+
+
+
+
+\subsection{Collisions: naive approach}
+The performance of a naieve many-particle system with simple collisions was 
+evaluated and the results are show in figure \ref{quadraticComplexity}.  
+This naive approach was simulated by using just one box for the entire 
+world. The quadratic complexity of the problem in function of the number of 
+particles is clearly visible.
 
 \figOctave{quadraticComplexity}{Quadratic complexity with one box.  
 Worldsize $50 \times 50 \times 50$, radius $0.5$.}
 
-\figOctave{fixedPartnum}{Effect of number of boxes on performance, for a 
-fixed number of particles. Worldsize $50 \times 50 \times 50$, radius 
-$0.1$, 10000 particles.}
 
 
 \subsection{Space partitioning}
@@ -34,14 +72,16 @@ around the ideal number.  We have determined the optimum number of boxes
 for a large amount of particles and graphed it in figure 
 	\ref{idealNboxR0p5}.
 
+\figOctave{fixedPartnum}{Effect of number of boxes on performance, for a 
+fixed number of particles. Worldsize $50 \times 50 \times 50$, radius 
+$0.1$, 10000 particles.}
+
+
 In that test, each particle has a radius of $0.5$ and the worldsize was 
 kept constant at $50 \times 50 \times 50$. The number op particles ranged 
 from 0 to 10\,000. With the maximum number of particles, the world was 
 filled for about 4\%, expressed as the fraction of volume of all particles 
 with respect to the volume of the world.
-
-{\LARGE XXX XXX XXX hockeystick curve om aan te duiden max vullingsfractie 
-XXX XXX XXX}
 
 From the clear linear trend in this plot, it follows that --- for our 
 implementation  --- the ideal number of boxes is roughly ten times the 
