@@ -25,8 +25,12 @@ total volume of the spheres is less than the available volume, there is no
 guarantee that the spheres will fit. Because of the round shape of the spheres, 
 there will always be some space that goes to waste.
 
+\figOctave{fillJcurve}{Fraction of failed particle placements w.r.t.  
+packing density. Note the logarithmic scale on the vertical axis.}
+
 The problem of trying to fit as many spheres as possible in a fixed 
-container is knows as \emph{sphere packing}. It is proven\cite{idealPacking}
+container is knows as \emph{sphere packing}. It is 
+proven\cite{idealPacking}
 that the most ideal sphere packing has a volume fraction of $\pi / \sqrt{18}
 \approx 0.74$. This happens when the spheres are placed on a regular grid
 called  ``face centered cubic''. Our implementation, however, fills the 
@@ -36,15 +40,19 @@ the packing in such a random way cannot exceed approximately 63\%. This is the
 absolute maximum, assuming the randomly placed particles are ``shaken'' as much 
 as possible to let them settle down and reach the lowest possible volume.
 
-\figOctave{fillJcurve}{Fraction of failed particle placements w.r.t.  
-packing density. Note the logarithmic scale on the vertical axis.}
-
 Our algorithm did no such ``shaking'', and could only fill the world up to 
 a density of 52\%. A graph of the failed particle placements w.r.t the 
 packing density is given in figure \ref{fillJcurve}. Notice the 
 asymptotical behaviour near the 52\% density. Above this density, the 
-algorithm will loop forever, trying to insert a particle in a random position, 
-but it will never succeed in doing so.
+algorithm will loop forever, trying to insert a particle in a random 
+position, but it will never succeed in doing so.
+
+A render of the maximum density that our algorithm could achieve is shown 
+in figure \ref{maxDensity}.
+
+\fig{width=0.4\textwidth}{maxDensity}{Render of a world with the maximum 
+amount of particles.}
+
 
 \subsection{Collisions: naive approach}
 The performance of a naive many-particle system with simple collisions was 

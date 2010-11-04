@@ -6,8 +6,8 @@
 #include "render.h"
 #include "system.h"
 
-#define SCREEN_W 1280
-#define SCREEN_H 800
+#define SCREEN_W 1100
+#define SCREEN_H 1100
 
 typedef struct {
 	GLfloat x, y, z;
@@ -205,8 +205,20 @@ int render(void)
 	glEnd();
 
 #ifdef BROWNIAN
+#if 0
 	renderSphere(huge.pos.x - s/2, huge.pos.y - s/2, huge.pos.z - s/2,
 			config.radiusHuge);
+#else
+	Particle *p = &huge;
+	glPushMatrix();
+		glTranslatef(p->pos.x - s/2, 
+				p->pos.y - s/2, p->pos.z - s/2);
+		glScalef(config.radiusHuge, config.radiusHuge, config.radiusHuge);
+		glDrawElements(GL_TRIANGLES, numIndices, 
+				GL_UNSIGNED_SHORT, sphereIndex);
+	glPopMatrix();
+#endif
+
 #endif
 	glColor3f(0.0, 0.7, 0.0);
 	glPointSize(2);
@@ -216,9 +228,11 @@ int render(void)
 
 #if 1
 		glPushMatrix();
-			glTranslatef(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2);
+			glTranslatef(p->pos.x - s/2, 
+					p->pos.y - s/2, p->pos.z - s/2);
 			glScalef(config.radius, config.radius, config.radius);
-			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, sphereIndex);
+			glDrawElements(GL_TRIANGLES, numIndices, 
+					GL_UNSIGNED_SHORT, sphereIndex);
 		glPopMatrix();
 #else
 		renderSphere(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2, 
