@@ -1,13 +1,13 @@
-\section{Results}
-\subsection{Physical results}
+\section{Applications}
 
 To validate the correctness of the software, we have tested some important 
-physical phenomena that are described by statistical mechanics. We studied the 
-Maxwell-Boltzmann distribution and Brownian motion. Other interesting phenomena 
-include adsorption models, the Van der Waals corrections to the ideal gas law, 
-diffusion, heat conduction, phase transitions, thin film phenomena, etc...
+physical phenomena that are described by statistical mechanics. We studied 
+the Maxwell-Boltzmann distribution and Brownian motion. Other interesting 
+phenomena include adsorbtion models, the Van der Waals corrections to the 
+ideal gas law, diffusion, heat conduction and capacity, phase transitions, 
+thin film phenomena, etc...
 
-\subsubsection{Maxwell-Boltzmann distribution}
+\subsection{Maxwell-Boltzmann distribution}
 The Maxwell-Boltzmann speed distribution describes the probability density of 
 the speed of a gas particle. The necessary temperature parameter was calculated 
 from our simulation using the equipartition theorem.
@@ -59,7 +59,7 @@ was given by $\left<v^2\right>/3$, in our case 1/3.
 The results are clearly in perfect agreement with the predicted result.
 
 
-\subsubsection{Brownian motion}
+\subsection{Brownian motion}
 With a small change to the software, a single massive, huge particle was 
 introduced in the system. Because of its relative size, space partitioning 
 could not be used for this new particle and each smaller particle had to be 
@@ -80,16 +80,17 @@ plotted in figure \ref{brown}. Brownian motion is discernible in the path.
 center dot. (worldsize $320 \times 320 \times 320$, 10\,000 particles of 
 radius 0.5, radius of large particle: 10, mass: 1)}
 
-\subsubsection{Ideal gas law}
+
+\subsection{Ideal gas law and Van der Waals corrections}
 
 If every collision with the wall is noted and the change in momentum is 
-recorded, an expression for the pressure on the wall can be obtained. Because 
-this quantity must abide to the ideal gas law, it provides us with a simple 
-verification for a many-particle simulation. We don't elaborate on this subject 
-because the temperature is derived from the average kinetic energy and thus the 
-ideal gas law is trivially satisfied.
+recorded, an expression for the pressure on the wall can be obtained. Using 
+the equipartition theorem to retrieve the temperature, it is possible to 
+simulate the ideal gas law with the additional Van der Waals correction for 
+particles with finite volume.
 
-\subsubsection{Heat conduction}
+
+\subsection{Heat conduction and specific heat}
 
 Heat conduction is another phenomenon that can be studied. No results are shown 
 in this article but we propose a method how one can implement this using the 
@@ -113,20 +114,44 @@ stationary particle stores its kinetic energy in a vibration mode. This
 gives an idea of the temperature distribution of the system and doesn't 
 require a very dense gas.
 
-\subsubsection{Langmuir adsorption model}
+By varying the temperature of the walls, the specific heat can be 
+determined. The vibration modes of the last probosition could even be 
+linked to phonons in the Debye model of a solid to model their contribution 
+to the specific heat.
 
-A simple surface adsorption model can be implemented. We propose that particles 
-that make contact with a wall can be adsorped if their momentum normal to the 
-wall is small enough. Once adsorped, their lost kinetic energy is stored in a 
-vibration mode and the particles can move freely in two dimensions on the wall.  
-The particle can be desorped if through interactions with other particles it 
-can gain enough kinetic energy. The expression for the vapour pressure is 
-\cite{adsorptionModel}
+
+\subsection{Langmuir adsorbtion model}
+
+A simple surface adsorbtion model can be implemented. We propose that particles 
+that make contact with a wall can be adsorbed if their momentum normal to the 
+wall is small enough. Once adsorbed, their lost kinetic energy is stored in a 
+vibration mode and the particles can move freely in two dimensions on the 
+wall.  The particle can be desorped if, through interactions with other 
+particles, it can gain enough kinetic energy. This second particle can be a 
+particle that is itself bound to the wall and moving over its surface, or a 
+particle from the gas that collides with bound particle.
+
+The proportion of adsorbed particles given by the Langmuir model is given 
+by\cite{adsorbtionModel}
 $$
-P_{\textrm{gas}} = 
-\frac{N_{\textrm{ad}}}{A}\frac{kT}{\lambda_{\textrm{th}}}e^{-\epsilon/kT}
+\frac{N_\mathrm{ads}}{N_\mathrm{gas}} =
+\frac{A \lambda_\mathrm{th}}{V}e^{\epsilon/kT}
 $$
-where $\lambda_{\textrm{th}}$ is the thermal de Broglie wavelength, $A$ the 
-surface area, $N_{\textrm{ad}}$ the number of adsorbed particles, $\epsilon$ 
-the binding energy of the wall and $P_{\textrm{gas}}$ the vapour pressure of 
-the gas.
+where $N_\mathrm{ads}$ is the number of adsorbed particles, $N_\mathrm{gas} 
+$ the number of unbound particles, $\lambda_{\textrm{th}}$ the thermal de 
+Broglie wavelength $\lambda_{\mathrm{th}}^2 = h^2 / 2 \pi m k T$, $A$ the 
+surface area and $\epsilon$ the binding energy of the wall.
+
+Note the occurence of the constant op Planck in the expression for the 
+thermal wavelength. It would be interesting to see if our proposed simple 
+(and fully classical) model could be used to estimate this fundamental 
+constant of quantum mechanics.
+
+
+\section{Conclusions}
+The simulations of the Maxwell-Boltzmann distribution and Brownian motion 
+show that our implementation gives the correct results. The proposed models
+for the ideal gas law with a Van der Waals correction, the heat conduction 
+and heat capacity and the proposed classical model of adsorbtion are 
+interesting subjcts for further study based on the given performant 
+framework of colliding spheres with space partitioning.
