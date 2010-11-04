@@ -12,44 +12,44 @@ The Maxwell-Boltzmann speed distribution describes the probability density of
 the speed of a gas particle. The necessary temperature parameter was calculated 
 from our simulation using the equipartition theorem.
 $$
-E_{\textrm{avg, kin}} = \left< \frac{mv^2}{2} \right> = \frac{3k_BT}{2}
+\left< E_{\mathrm{kin}} \right> = \left< \frac{mv^2}{2} \right> = \frac{3kT}{2}
 $$
-With $m$ the mass of each particle and $k_B$ the Boltzmann constant. Both were 
+With $m$ the mass of each particle and $k$ the Boltzmann constant. Both were 
 set to unity in our simulation. Thus
 $$
 T = \frac{\left< v^2 \right>}{3}
 $$
-The well known Maxwell-Boltzmann distribution reads \cite{maxwellDist}
-$$
+The well known Maxwell-Boltzmann distribution\cite{maxwellDist} reads $$
 f(v)\dif v = \left( \frac{\beta m}{2 \pi} \right)^{3/2} 4 \pi v^2
 \exp\left( -\beta \frac{mv^2}{2}\right) \dif v =
 \sqrt{ \frac{2}{\pi T^3} } v^2 \exp \left(-\frac{v^2}{2T}\right) \dif v
 $$
-with T given in function of the expectation of the squared velocity above.
+with T given in function of the expectation value of the squared velocity 
+above.
 
 The velocity of our particles got initialized as a vector of fixed length 
 1, pointing in a random direction. Thus, the inital speed distribution has 
 the shape of a delta distribution around the speed 1. Through collisions 
-between the particles, the particles reach thermal equilibrium. While doing 
-so, the sharp peak in the speed distribution relaxes to approximate the 
-Maxwell-Boltzmann distribution. Figure \ref{relax} represents this relaxation.  
-The parameters for this simulation were: a worldsize of $48 \times 48 \times 
-48$, 4000 particles with radius 0.2 and a timestep of 0.01. The three plots 
-were made at 5\,000, 10\,000 and 15\,000 iterations. The distribution converges 
-the theoretical Maxwell-Boltzmann distribution. The peak in the middle of the 
-plot is a remnant of the initial delta distribution of the speeds.
+between particles, these reach thermal equilibrium. While doing so, the sharp 
+peak in the speed distribution relaxes to approximate the Maxwell-Boltzmann 
+distribution. Figure \ref{relax} depicts this relaxation.  The parameters for 
+this simulation were: a worldsize of $48 \times 48 \times 48$, 4000 particles 
+with radius 0.2 and a timestep of 0.01. Plots were made after 5\,000, 10\,000 
+and 15\,000 iterations. The distribution converges the theoretical 
+Maxwell-Boltzmann distribution. The peak in the middle of the plot is a remnant 
+of the initial delta distribution of the speeds.
 
 \figOctave{relax}{Relaxation of the speed distribution after 5\,000 (blue), 
 10\,000 (green) and 15\,000 (red) iterations. The black curve is the 
 theoretical equilibrium distribution}
 
-The average of three  resulting simulated distributions is shown in figure 
-\ref{maxwell} together with the theoretical result. The parameters used were: a 
-worldsize of $60 \times 60 \times 60$, 8000 particles with radius 0.2 and a 
-relaxation time of 15\,000 iterations with timestep 0.05.
+The average of three simulated distributions is shown in figure \ref{maxwell} 
+together with the theoretical result. The parameters used were: a worldsize of 
+$60 \times 60 \times 60$, 8000 particles with radius 0.2 and a relaxation time 
+of 15\,000 iterations with timestep 0.05.
 
-\fig{width=0.8\textwidth}{maxwellRender}{Render of the setup used to determine 
-the Maxwell distribution}
+\fig{width=0.8\textwidth}{maxwellRender}{Rendering of the setup used to 
+determine the Maxwell distribution}
 
 Note that the density in our example was about 0.1\% (the fraction of total 
 particle volume with respect to the world size). This roughly approximates 
@@ -78,11 +78,11 @@ checked for interactions with the huge particle separately. This of course
 did not change the linear complexity of the algorithm and had a negligible 
 effect on performance.
 
-We placed a particle of radius $10$ and mass 1 in the center of a $320 
-\times 320 \times 320$ world without initial velocity. The rest of the 
-world got filled randomly with 10\,000 particles of radius 0.5 and of the 
-same mass. The velocities of these particles has fixed length of 1 and
-point in random directions.
+We placed a particle of radius $10$ and mass 1 in the center of a $320 \times 
+320 \times 320$ world without initial velocity. The rest of the world was 
+filled randomly with 10\,000 particles of radius 0.5 and of the same mass. The 
+velocities of these particles had a fixed length of 1 and
+were pointing in random directions.
 
 The trajectory of the large particle during four runs of the simulation is 
 plotted in figure \ref{brown}. Brownian motion is discernible in the path.
@@ -101,7 +101,7 @@ If every collision with the wall is noted and the change in momentum is
 recorded, an expression for the pressure on the wall can be obtained. Using 
 the equipartition theorem to retrieve the temperature, it is possible to 
 simulate the ideal gas law with the additional Van der Waals correction for 
-particles with finite volume.
+particles with finite volume. No such simulations were performed.
 
 
 \subsection{Heat conduction and specific heat}
@@ -112,8 +112,9 @@ software.
 
 The first proposal models heat conduction in a gas. We propose to give two 
 opposite walls a different temperature. When a particle collides with a 
-wall, the normal component with respect to the wall gets mixed randomly 
-with the momentum it would have if it had the same temperature as the wall.  
+wall, the normal component with respect to the wall gets mixed randomly with 
+the momentum it would have had if it were at the temperature of the wall.  
+
 
 This is enough to model heat transfer from one wall to another. With a 
 sufficiently dense gas, and a sufficient distance between the walls, it is 
@@ -129,7 +130,7 @@ gives an idea of the temperature distribution of the system and doesn't
 require a very dense gas.
 
 By varying the temperature of the walls, the specific heat can be 
-determined. The vibration modes of the last probosition could even be 
+determined. The vibration modes of the last proposition could even be 
 linked to phonons in the Debye model of a solid to model their contribution 
 to the specific heat.
 
@@ -137,13 +138,13 @@ to the specific heat.
 \subsection{Langmuir adsorption model}
 
 A simple surface adsorption model can be implemented. We propose that particles 
-that make contact with a wall can be adsorbed if their momentum normal to the 
-wall is small enough. Once adsorbed, their lost kinetic energy is stored in a 
-vibration mode and the particles can move freely in two dimensions on the 
-wall.  The particle can be desorped if, through interactions with other 
-particles, it can gain enough kinetic energy. This second particle can be a 
-particle that is itself bound to the wall and moving over its surface, or a 
-particle from the gas that collides with bound particle.
+making contact with a wall can be adsorbed if their momentum normal to the wall 
+is small enough. Once adsorbed, their lost kinetic energy is stored in a 
+vibration mode and the particles can move freely in two dimensions on the wall.  
+The particle can be desorped if, through interactions with other particles, it 
+can gain enough kinetic energy. This second particle can be a particle that is 
+itself bound to the wall and moving over its surface, or a particle from the 
+gas that collides with the bound particle.
 
 The proportion of adsorbed particles given by the Langmuir model is given 
 by\cite{adsorptionModel}
@@ -151,12 +152,12 @@ $$
 \frac{N_\mathrm{ads}}{N_\mathrm{gas}} =
 \frac{A \lambda_\mathrm{th}}{V}e^{\epsilon/kT}
 $$
-where $N_\mathrm{ads}$ is the number of adsorbed particles, $N_\mathrm{gas} 
-$ the number of unbound particles, $\lambda_{\textrm{th}}$ the thermal de 
-Broglie wavelength $\lambda_{\mathrm{th}}^2 = h^2 / 2 \pi m k T$, $A$ the 
-surface area and $\epsilon$ the binding energy of the wall.
+where $N_\mathrm{ads}$ is the number of adsorbed particles, $N_\mathrm{gas} $ 
+the number of unbound particles, $\lambda_{\mathrm{th}}$ the thermal de Broglie 
+wavelength $\lambda_{\mathrm{th}}^2 = h^2 / 2 \pi m k T$, $A$ the surface area 
+and $\epsilon$ the binding energy of the wall.
 
-Note the occurence of the constant op Planck in the expression for the 
+Note the occurence of the constant of Planck in the expression for the 
 thermal wavelength. It would be interesting to see if our proposed simple 
 (and fully classical) model could be used to estimate this fundamental 
 constant of quantum mechanics.

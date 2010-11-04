@@ -19,9 +19,9 @@ random position. If this particle collides with an existing particle, a new
 random location is tried, otherwise the particle is added.
 
 Of course, there exists a limit to the amount of spheres that can be packed in 
-a container. If the total volume of the spheres exceed the available volume, it 
-is of course impossible to place them in this container.  Moreover, even if the 
-total volume of the spheres is less than the available volume, there is no 
+a container. If the total volume of the spheres exceeds the available volume, 
+it is of course impossible to place them in this container.  Moreover, even if 
+the total volume of the spheres is less than the available volume, there is no 
 guarantee that the spheres will fit. Because of the round shape of the spheres, 
 there will always be some space that goes to waste.
 
@@ -29,7 +29,7 @@ there will always be some space that goes to waste.
 packing density. Note the logarithmic scale on the vertical axis.}
 
 The problem of trying to fit as many spheres as possible in a fixed 
-container is knows as \emph{sphere packing}. It is 
+container is known as \emph{sphere packing}. It is 
 proven\cite{idealPacking}
 that the most ideal sphere packing has a volume fraction of $\pi / \sqrt{18}
 \approx 0.74$. This happens when the spheres are placed on a regular grid
@@ -40,12 +40,12 @@ the packing in such a random way cannot exceed approximately 63\%. This is the
 absolute maximum, assuming the randomly placed particles are ``shaken'' as much 
 as possible to let them settle down and reach the lowest possible volume.
 
-Our algorithm did no such ``shaking'', and could only fill the world up to 
-a density of 52\%. A graph of the failed particle placements w.r.t the 
-packing density is given in figure \ref{fillJcurve}. Notice the 
-asymptotical behaviour near the 52\% density. Above this density, the 
-algorithm will loop forever, trying to insert a particle in a random 
-position, but it will never succeed in doing so.
+Our algorithm did no such ``shaking'', and could only fill the world up to a 
+density of 52\%. A graph of the failed particle placements w.r.t. the packing 
+density is given in figure \ref{fillJcurve}. Notice the asymptotical behaviour 
+near the 52\% density. Above this density, the algorithm will loop forever, 
+trying to insert a particle in a random position, but it will never succeed in 
+doing so.
 
 A render of the maximum density that our algorithm could achieve is shown 
 in figure \ref{maxDensity}.
@@ -56,7 +56,7 @@ amount of particles.}
 
 \subsection{Collisions: naive approach}
 The performance of a naive many-particle system with simple collisions was 
-evaluated and the results are show in figure \ref{quadraticComplexity}.  This 
+evaluated and the results are shown in figure \ref{quadraticComplexity}.  This 
 naive approach was simulated by using just one box for the entire world. The 
 quadratic complexity of the problem in function of the number of particles is 
 clearly visible.
@@ -74,12 +74,12 @@ the ideal number.  We have determined the optimum number of boxes for a large
 amount of particles and graphed it in figure \ref{idealNboxR0p5}.
 
 \figOctave{fixedPartnum}{Effect of number of boxes on performance, for a 
-fixed number of particles. Worldsize $50 \times 50 \times 50$, radius 
-$0.1$, 10000 particles.}
+fixed number of particles. Worldsize $50 \times 50 \times 50$, radius $0.1$, 
+10\,000 particles.}
 
 
 In that test, each particle has a radius of $0.5$ and the worldsize was 
-kept constant at $50 \times 50 \times 50$. The number op particles ranged 
+kept constant at $50 \times 50 \times 50$. The number of particles ranged 
 from 0 to 10\,000. With the maximum number of particles, the world was 
 filled for about 4\%, expressed as the fraction of volume of all particles 
 with respect to the volume of the world.
@@ -91,17 +91,17 @@ particle in every tenth box. Thus we can conclude that detecting a
 collision is \emph{much} harder than dealing with the overhead of iterating 
 over the boxes.
 
-Another interesting features about this curve is the anomaly found at 
-around 1\,000 to 2\,000 particles. Here, the ideal number of boxes is 
-constant and takes the value 15\,625, or $25^3$. Note that this means that 
-every box has a size of exactly $2 \times 2 \times 2$. We believe that the 
-preference for this amount of boxes comes from the fact that a computer can 
-easily do arithmetic with numbers that are powers of two. Thus this anomaly 
-has more to do with the hardware running the algorithm than the algorithm 
-itself. Note that there also seems to be a plateau around 8\,000 of particles 
-and above. This occurs at 125\,000 boxes, or exactly $50^3$. Each box now has 
-size $1 \times 1 \times 1$, and calculations (divisions, multiplications) with 
-the number 1 can be done quite efficiently indeed.
+Another interesting feature of this curve is the anomaly found at around 1\,000 
+to 2\,000 particles. Here, the ideal number of boxes is constant and takes the 
+value 15\,625, or $25^3$. Note that this means that every box has a size of 
+exactly $2 \times 2 \times 2$. We believe that the preference for this amount 
+of boxes comes from the fact that a computer can easily do arithmetic with 
+numbers that are powers of two. Thus this anomaly has more to do with the 
+hardware running the algorithm than the algorithm itself. Note that there also 
+seems to be a plateau around 8\,000 particles and more. This occurs at 125\,000 
+boxes, or exactly $50^3$. Each box now has size $1 \times 1 \times 1$, and 
+calculations (divisions, multiplications) with the number 1 can be done quite 
+efficiently indeed.
 
 Recall that for the maximum number of particles chosen, only 4\% of the 
 available space is filled. However, we could not extend the graph to the 
@@ -110,9 +110,8 @@ smaller than 1. Given that the chosen radius of a particle was $0.5$, this
 would mean that two particles could collide that are not in adjacent boxes.  
 This collision would not get detected and the results would be useless.
 
-The only way to circumvent this is to use a smaller radius per particle.  
-This was done in figure \ref{idealNboxR0p1}, where a radius of 0.1 was 
-chosen.
+The only way to circumvent this is using a smaller radius per particle.  This 
+was done in figure \ref{idealNboxR0p1}, where a radius of 0.1 was chosen.
 
 \figOctave[htb]{idealNboxR0p5}{Ideal number of boxes for given (small) 
 number of particles.  Worldsize $50 \times 50 \times 50$, radius $0.5$.}
@@ -165,21 +164,21 @@ particles (while reducing the radius of the particles to 0.1). Note the
 deviation from the linear trend. This can once again be ascribed to the 
 hardware running the algorithm. The formal derivation for the linear time 
 complexity assumed a constant fraction of particles in a box, $x$. We found 
-above that for a small amount of particles, the ideal $x$-value was about 
-1/10. For a large amount of particles, however, is value increased to about 
-1/7 for 100\,000 particles above. Thus this $x$ depends on the number of 
-particles and so the theoretically expected linear curve turns out slightly 
-superlinear in practise.
+above that for a small amount of particles, the ideal $x$-value was about 1/10.  
+For a large amount of particles, however, this value increased to about 1/7 for 
+100\,000 particles above. Thus this $x$ depends on the number of particles and 
+so the theoretically expected linear curve turns out to be slightly superlinear 
+in practise.
 
-Going to even higer particle numbers, this anomaly vanishes again, as seen 
-in figure \ref{linearComplexityR0p1-1M}. Note that at the point of 1.2 
+Going to even higher particle numbers, this anomaly vanishes again, as seen in 
+figure \ref{linearComplexityR0p1-1M}. Note that at the point of 1.2 
 \emph{million} particles, every iteration still only takes about 1 second on 
 the testing machine. For comparison, this would take 5 \emph{years} with the 
 naive model of figure \ref{quadraticComplexity}.
 
-\figOctave{linearComplexityR0p1-1M}{Stabilising of linear complexity with 
-ideal number of boxes for \emph{very} large amount of particles.  Worldsize 
-$50 \times 50 \times 50$, radius $0.1$.}
+\figOctave{linearComplexityR0p1-1M}{Stabilisation of linear complexity with 
+ideal number of boxes for \emph{very} large amount of particles.  Worldsize $50 
+\times 50 \times 50$, radius $0.1$.}
 
 
 
@@ -188,14 +187,13 @@ In theory, space partitioning allows us to reduce the time complexity of a
 many-particles simulation from $O(n^2)$ to $O(n)$.
 
 In our example, the ideal number of boxes to maximize the number of 
-iterations per second turns out to be around 10 times more than the amount 
-of particles. Due to the nature of the underlaying hardware, this varies 
-slightly as the memory demand grows larger. This also means that the ideal 
-complexity that can be achieved in practice is slightly superlinear for 
-some intermediate regimes.  It must be noted, however, that this 
-superlinear complexity is nowhere near as bad as the quadratic complexity of 
-the naive implementation, and that it turns linear again for large numbers of 
-particles.
+iterations per second turns out to be around 10 times more than the amount of 
+particles. Due to the nature of the underlying hardware, this varies slightly 
+as the memory demand grows larger. This also means that the ideal complexity 
+that can be achieved in practice is slightly superlinear for some intermediate 
+regimes.  It must be noted, however, that this superlinear complexity is 
+nowhere near as bad as the quadratic complexity of the naive implementation, 
+and that it turns linear again for large numbers of particles.
 
 
 

@@ -1,25 +1,24 @@
 \section{Implementation}
 
+The code of this project will be hosted at 
+\url{http://github.com/kmmeerts/ManyParticles} for the forseeable future.
 \subsection{Programming language}
-For this project, performance was a prime goal and thus the only contemplated 
-programming languages were C and C++.  Originally, we decided to implement the 
+For this project, performance was a prime goal and thus the only programming 
+languages considered were C and C++. Originally, we decided to implement the 
 project in C++. It seemed to us that the clear distinction between the system, 
 a partition and a particle lent itself well to an object-oriented programming 
 language. Another advantage was the Standard Template Library (STL) which 
 provided us with an efficient doubly linked list. Lastly, overloading the 
-addition and multilpication operators allowed for a natural expression of 
+addition and multiplication operators allowed for a natural expression of 
 vector operations.
 
 The performance critical nature of the problem, on the other hand, did not 
-lend itself too well to the object-oriented programming paradigm. The 
-principles of information hiding and encapsulation added a considerable 
-overhead to the code. Lastly, we have a lot more experience writing C when 
-compared to C++.  Given the time constraints, it was more natural to write 
-in a language we knew better.
+quite lend itself to the object-oriented programming paradigm. The principles 
+of information hiding and encapsulation added a considerable overhead to the 
+code.  Lastly, we have a lot more experience writing C when compared to C++.  
+Given the time constraints, it was more natural to write in a language we knew 
+better. For these reasons, we switched to C.
 
-For these reasons, we decided to switch to C.  This conversion only took an 
-hour and the imperative paradigm seemed more fit to develop a performant 
-program in a reasonable amount of time.
 
 \subsection{Data structures}
 
@@ -33,20 +32,20 @@ struct Vec3 {
 \end{lstlisting}
 
 A particle is represented by its position and velocity. The particles needs 
-to be contained in a box so we store them in a circular doubly-linked list.  
+to be contained in a box so we store them in a circular doubly-linked list. 
 This enables us to easily iterate over all the particles in a box.
 \begin{lstlisting}
 struct Particle {
-	Vec3 pos;
-	Vec3 vel;
+	struct Vec3 pos;
+	struct Vec3 vel;
 	struct Particle *prev, *next;
 };
 \end{lstlisting}
-In this case, a box is little more than a pointer to any particle it contains.  
+In this case, a box is little more than a pointer to any particle it contains. 
 For various reasons, we keep track of the amount of particles in each box.
 \begin{lstlisting}
 struct Box {
-	Particle *p;
+	struct Particle *p;
 	int n;
 };
 \end{lstlisting}
@@ -62,13 +61,13 @@ Each iteration, the simulation is advanced one timestep. This step consists of
 first checking for collisions with other particles, then the particles are 
 checked for collisions with the walls and lastly every particle is moved in a 
 straight line according to its velocity. Any particle that moves over the 
-boundary of a partition is transfered to its new box.
+boundary of a partition is transferred to its new box.
 
 To find out whether a particle intersects another particle, we test it against 
 every other particle in the same box. As this is the common case, this step is 
-performed first. If this search yields nothing, we check against particle in 
+performed first. If this search yields no results, we check against particle in 
 neighbouring boxes. Note that it is important that the box size is at least two 
-times the radius of each particle for we could miss some collisions otherwise. 
+times the radius of each particle for we could miss some collisions otherwise.  
 A possible, unimplemented performance improvement would be only checking the 
 boxes that intersect the particle. 
 
@@ -106,7 +105,7 @@ sensitive to external conditions.
 At the start of the program the world is filled with a given amount of 
 particles. This overhead is not included in the benchmark results. Then, 
 either the system is rendered graphically (using OpenGL) for debugging 
-purposes, or it loops a set amount of iterations.  Optionally, the 
+purposes, or it loops a set amount of iterations. Optionally, the 
 positions and velocities of each particle are printed. This way, we can 
-plot a distribution of the speed or demonstrate Brownian motion, the 
-results of which are explained in the next section.
+plot a distribution of the speed or demonstrate Brownian motion, the results of 
+which are given in the next section.
