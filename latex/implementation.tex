@@ -67,10 +67,15 @@ boundary of a partition is transfered to its new box.
 To find out whether a particle intersects another particle, we test it against 
 every other particle in the same box. As this is the common case, this step is 
 performed first. If this search yields nothing, we check against particle in 
-neighbouring boxes. A possible, unimplemented performance improvement would be 
-only checking the boxes that intersect the particle. It is important that the 
-box size is at least two times the radius of each particle for we could miss 
-some collisions otherwise.
+neighbouring boxes. Note that it is important that the box size is at least two 
+times the radius of each particle for we could miss some collisions otherwise. 
+A possible, unimplemented performance improvement would be only checking the 
+boxes that intersect the particle. 
+
+The law of conversation of momentum allows to make another small performance 
+improvement. The equations for the elastic collision are solved for one of the 
+particles. Instead of doing the same for the other particle, the change in 
+momentum of the first particle is subtracted from the second particle.
 
 \begin{lstlisting}
 function stepWorld()
