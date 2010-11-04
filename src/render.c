@@ -1,3 +1,10 @@
+/*
+ * Many-particle simulation software
+ * Copyright (C) 2010 Roald Frederickx and Kasper Meerts
+ *
+ * This program is released under the terms of the license contained
+ * in the file LICENSE.
+ */
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <GL/gl.h>
