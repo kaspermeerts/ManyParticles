@@ -158,8 +158,8 @@ particles are too far apart. This $O(n^2)$ complexity is undesirable for
 performance reasons.  An often used technique is called \textbf{spatial 
 partitioning}.
 
-By splitting the world into smaller partitions, \emph{boxes}, one only has to 
-check for interactions between particles in nearby partitions. If we keep the 
-particles per box a constant ($x$), the amount of boxes becomes $n/x$. The 
-complexity of this problem reduces in this way to $O(x^2 \cdot n/x) = O(n)$, 
-linear in the number of particles.
+By splitting the world into smaller partitions, or \emph{boxes}, one only 
+has to check for interactions between particles in nearby partitions. If we 
+keep the particles per box a constant ($x$), the amount of boxes becomes 
+$n/x$. The complexity of this problem thus reduces to $O(x^2 \cdot n/x) = 
+O(n)$, linear in the number of particles.
