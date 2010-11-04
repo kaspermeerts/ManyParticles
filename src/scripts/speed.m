@@ -18,6 +18,7 @@ xt = linspace(0,max(x),100);
 yt = maxwellDist(T, xt);
 plot(x, y, 'o', xt, yt);
 
+axis([0,2.5,0,1.2]);
 
 name='maxwell';
 ylabrule='0.3cm';
