@@ -3,10 +3,10 @@ TARGET=particle
 all: tex
 
 ALL: 
-	make -B all
-	make -B bib
-	make -B all
-	make -B all
+	make -B all -i
+	make -B bib 
+	make -B all -i
+	make -B all 
 
 tex:
 	pdflatex ${TARGET}.tex
