@@ -1,9 +1,8 @@
 #define _GNU_SOURCE
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <SDL/SDL.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -12,37 +11,9 @@
 #include "system.h"
 #include "render.h"
 
-static int renderLoop(void);
+int renderLoop(void);
 static void parseArguments(int argc, char **argv);
 static void printStats(void);
-
-static int renderLoop(void)
-{
-	SDL_Event event;
-
-	while (1)
-	{
-		while (SDL_PollEvent(&event))
-		{
-			if (event.type == SDL_QUIT)
-				return 0;
-			else if (event.type == SDL_KEYDOWN)
-			{
-				switch (event.key.keysym.sym)
-				{
-				case SDLK_ESCAPE:
-					return 0;
-					break;
-				default:
-					break;
-				}
-			}
-		}
-
-		render();
-		stepWorld();
-	}
-}
 
 static void printStats()
 {

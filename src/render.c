@@ -1,6 +1,6 @@
+#include <stdio.h>
 #include <SDL/SDL.h>
 #include <GL/gl.h>
-#include <GL/glu.h>
 #include <math.h>
 #include "main.h"
 #include "render.h"
@@ -9,25 +9,103 @@
 #define SCREEN_W 1280
 #define SCREEN_H 800
 
-SDL_Surface *surface;
-
-GLfloat light_pos[] = {  3.0, 1.0, 1.0, 0.0 };
-GLfloat light_diff[] = { 1.0, 1.0, 1.0, 0.0 };
-GLfloat light_spec[] = { 0.0, 0.0, 0.0, 0.0 };
-GLfloat light_ambi[] = { 0.8, 0.8, 0.8, 0.0 };
-
-static int numVertices;
-static int numIndices;
-
 typedef struct {
 	GLfloat x, y, z;
 } Vertex3;
 
+const GLfloat light_pos[]  = {2.0, 1.0, 2.0, 0.0};
+const GLfloat light_diff[] = {1.0, 1.0, 1.0, 0.0};
+const GLfloat light_spec[] = {1.0, 0.0, 0.0, 0.0};
+const GLfloat light_ambi[] = {0.8, 0.8, 0.8, 0.0};
+
+static int numVertices;
+static int numIndices;
 static Vertex3 *sphereVertex;
 static GLushort *sphereIndex;
+static SDL_Surface *surface;
+static float angle;
 
+static void createSphere(int slices);
+static void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, 
+		GLdouble zFar);
+static void calcFps(void);
+#ifdef BROWNIAN
 static void renderSphere(float x, float y, float z, float r);
-static void createSphere(int stacks, int slices);
+#endif
+
+static void calcFps()
+{
+	static int tock = 0, frames;
+	int tick;
+	char string[32];
+
+	frames++;
+	tick = SDL_GetTicks();
+
+	if (tick - tock > 1000)
+	{
+		tock = tick;
+		sprintf(string, "%u FPS\n", frames);
+		SDL_WM_SetCaption(string, string);
+		frames = 0;
+	}
+	return;
+}
+
+int renderLoop(void)
+{
+	SDL_Event event;
+
+	while (1)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT)
+				return 0;
+			else if (event.type == SDL_KEYDOWN)
+			{
+				switch (event.key.keysym.sym)
+				{
+				case SDLK_ESCAPE:
+					return 0;
+					break;
+				case SDLK_LEFT:
+					angle--;
+					break;
+				case SDLK_RIGHT:
+					angle++;
+					break;
+				case SDLK_UP:
+					config.timeStep *= 2;
+					break;
+				case SDLK_DOWN:
+					config.timeStep /= 2;
+					break;
+				default:
+					break;
+				}
+			}
+		}
+
+		render();
+		calcFps();
+		stepWorld();
+	}
+}
+
+static void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, 
+		GLdouble zFar)
+{
+	GLdouble xMin, xMax, yMin, yMax;
+
+	yMax = zNear * tan(fovy * M_PI / 360.0);
+	yMin = -yMax;
+
+	xMin = yMin * aspect;
+	xMax = yMax * aspect;
+
+	glFrustum(xMin, xMax, yMin, yMax, zNear, zFar);
+}
 
 int initRender(void)
 {
@@ -56,33 +134,38 @@ int initRender(void)
 	if (surface == NULL)
 		die(SDL_GetError());
 
+	SDL_EnableKeyRepeat(1, 
+			SDL_DEFAULT_REPEAT_INTERVAL);
+
 	/*SDL_WM_ToggleFullScreen(surface);	*/
 
 	atexit(SDL_Quit);
 
 	/* OpenGL Init */
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_NORMALIZE);
 
+	glEnable(GL_LIGHTING);
+
+	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diff);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diff);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light_spec);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambi);
+	glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambi);
+
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 
-	createSphere(16, 16);
+	createSphere(16);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(Vertex3), sphereVertex);
-	glNormalPointer(GL_FLOAT, sizeof(Vertex3), sphereVertex);
+	glNormalPointer(   GL_FLOAT, sizeof(Vertex3), sphereVertex);
 
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(40, SCREEN_W/(double)SCREEN_H, s/2, 4*s);
+	gluPerspective(35, SCREEN_W/(double)SCREEN_H, s/2, 4*s);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -94,18 +177,17 @@ int render(void)
 {
 	int i;
 	float s;
-	static float theta;
 
 	s = config.numBox * config.boxSize;
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	theta += 0.10;
+/*	angle += 0.10;*/
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0, 0, -s*2.5);
-	glRotatef(theta, 0, 1, 0);
+	glRotatef(angle, 0, 1, 0);
 
 	glColor3f(0.0, 1.0, 0.0);
 	glBegin(GL_LINE_LOOP);
@@ -151,12 +233,14 @@ int render(void)
 	return 0;
 }
 
-static void createSphere(int stacks, int slices)
+static void createSphere(int slices)
 {
 	int i, j, k;
 	float x, y, z;
 	float r;
+	int stacks;
 
+	stacks = slices;
 	slices *= 2;
 
 	/* Plus two for the poles */
@@ -244,9 +328,10 @@ static void createSphere(int stacks, int slices)
 	return;
 }
 
+#ifdef BROWNIAN
 static void renderSphere(float x, float y, float z, float r)
 {
-	const int stacks = 8;
+	const int stacks = 16;
 	const int slices = 8;
 	int i, j;
 
@@ -292,3 +377,4 @@ static void renderSphere(float x, float y, float z, float r)
 
 	return;
 }
+#endif

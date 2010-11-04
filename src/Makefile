@@ -23,7 +23,7 @@ brown:
 
 main: $(OBJECTS)
 	@echo "LD	main"
-	@gcc -o main $(OBJECTS) -lm -lSDL -lGL -lGLU -ggdb $(PROFILE)
+	@gcc -o main $(OBJECTS) -lm -lSDL -lGL -ggdb $(PROFILE)
 
 .c.o:
 	@echo "CC	$@"
