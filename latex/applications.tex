@@ -32,18 +32,24 @@ The velocity of our particles got initialized as a vector of fixed length
 the shape of a delta distribution around the speed 1. Through collisions 
 between the particles, the particles reach thermal equilibrium. While doing 
 so, the sharp peak in the speed distribution relaxes to approximate the 
-Maxwell-Boltzmann distribution.
+Maxwell-Boltzmann distribution. Figure \ref{relax} represents this relaxation.  
+The parameters for this simulation were: a worldsize of $48 \times 48 \times 
+48$, 4000 particles with radius 0.2 and a timestep of 0.01. The three plots 
+were made at 5\,000, 10\,000 and 15\,000 iterations. The distribution converges 
+the theoretical Maxwell-Boltzmann distribution. The peak in the middle of the 
+plot is a remnant of the initial delta distribution of the speeds.
 
-\figOctave{maxwell}{Speed distribution of a simulation and the expected 
-theoretical distribution for a temperature of 1/3}
-
-\fig{width=0.8\textwidth}{maxwellRender}{Render of the setup used to 
-determine the Maxwell distribution}
+\figOctave{relax}{Relaxation of the speed distribution after 5\,000 (blue), 
+10\,000 (green) and 15\,000 (red) iterations. The black curve is the 
+theoretical equilibrium distribution}
 
 The average of three  resulting simulated distributions is shown in figure 
-\ref{maxwell} together with the theoretical result. The parameters used 
-were: a worldsize of $60 \times 60 \times 60$, 8000 particles with radius 
-0.2 and a relaxation time of 15\,000 iterations with timestep 0.05.
+\ref{maxwell} together with the theoretical result. The parameters used were: a 
+worldsize of $60 \times 60 \times 60$, 8000 particles with radius 0.2 and a 
+relaxation time of 15\,000 iterations with timestep 0.05.
+
+\fig{width=0.8\textwidth}{maxwellRender}{Render of the setup used to determine 
+the Maxwell distribution}
 
 Note that the density in our example was about 0.1\% (the fraction of total 
 particle volume with respect to the world size). This roughly approximates 
@@ -54,13 +60,15 @@ iterations, as collisions will be very rare).
 The temperature of the theoretical curve was obtained from the formula 
 above, using that the temperature at the beginning\footnote{Note that it's 
 not quite appropriate to talk about a temperature in this case. We aren't 
-in thermal equilibrium yet and there is no entropy to calculate $\partial E 
-/ \partial S$. Nevertheless, using the equipartitiontheorem to define the 
+in thermal equilibrium yet and there is no entropy to calculate $\partial E / 
+\partial S$. Nevertheless, using the equipartition theorem to define the 
 temperature works just fine.}
 was given by $\left<v^2\right>/3$, in our case 1/3.
 
 The results are clearly in perfect agreement with the predicted result.
 
+\figOctave{maxwell}{Speed distribution of a simulation and the expected 
+theoretical distribution for a temperature of 1/3}
 
 \subsection{Brownian motion}
 With a small change to the software, a single massive, huge particle was 
