@@ -18,13 +18,12 @@ Our algorithm initializes the world by trying to insert a particle in a
 random position. If this particle collides with an existing particle, a new 
 random location is tried, otherwise the particle is added.
 
-Of course, there exists a limit to the amount of spheres that can be packed 
-in a container. If the total volume of the spheres exeeds the available 
-volume, it is of course impossible to place them in this container.  
-Moreover, even if the total volume of the spheres is less than the 
-available volume, there is no guarantee that the spheres will fit. Because 
-of the round shape of the spheres, there will always be some space that 
-goes to waste.
+Of course, there exists a limit to the amount of spheres that can be packed in 
+a container. If the total volume of the spheres exceed the available volume, it 
+is of course impossible to place them in this container.  Moreover, even if the 
+total volume of the spheres is less than the available volume, there is no 
+guarantee that the spheres will fit. Because of the round shape of the spheres, 
+there will always be some space that goes to waste.
 
 The problem of trying to fit as many spheres as possible in a fixed 
 container is knows as \emph{sphere packing}. It is proven\cite{idealPacking}
@@ -32,11 +31,10 @@ that the most ideal sphere packing has a volume fraction of $\pi / \sqrt{18}
 \approx 0.74$. This happens when the spheres are placed on a regular grid
 called  ``face centered cubic''. Our implementation, however, fills the 
 world in a random, irregular way. This is a closely related problem known 
-as \emph{random close packing}. Another theorem\cite{randomPacking} states 
-that the packing in such a random way cannot exeed approximately 63\%. This 
-is the absolute maximum, assuming the randomly placed particles are 
-``shaken'' as much as possible to let them settle down and reach the lowest 
-possible volume.
+as \emph{random close packing}. Another theorem\cite{randomPacking} states that 
+the packing in such a random way cannot exceed approximately 63\%. This is the 
+absolute maximum, assuming the randomly placed particles are ``shaken'' as much 
+as possible to let them settle down and reach the lowest possible volume.
 
 \figOctave{fillJcurve}{Fraction of failed particle placements w.r.t.  
 packing density. Note the logarithmic scale on the vertical axis.}
@@ -46,7 +44,7 @@ a density of 52\%. A graph of the failed particle placements w.r.t the
 packing density is given in figure \ref{fillJcurve}. Notice the 
 asymptotical behaviour near the 52\% density. Above this density, the 
 algorithm will loop forever, trying to insert a particle in a random position, 
-but never succeeding in doing so.
+but it will never succeed in doing so.
 
 \subsection{Collisions: naive approach}
 The performance of a naive many-particle system with simple collisions was 
@@ -123,11 +121,10 @@ in the previous graph to around 7 boxes per particle for large numbers of
 particles. This is likely caused by the added memory demand for the extra 
 particles and boxes and is once again more of a limitation of the hardware 
 than of the algorithm. Indeed, modern computers make heavy use of caching 
-data from memory on fast caches near the processor. When the working set of 
-a program exeeds this available space, performance will decrease. Hence it 
-makes sense to limit the amount of memory accesses when dealing with a 
-large working set (a lot of particles). This translates into using less 
-boxes.
+data from memory on fast caches near the processor. When the working set of a 
+program exceeds this available space, performance will decrease. Hence it makes 
+sense to limit the amount of memory accesses when dealing with a large working 
+set (a lot of particles). This translates into using less boxes.
 
 The results for an even greater amount of particles are plotted in figure 
 \ref{idealNboxR0p1-1M}. The particle number reaches 1.2 million. This would 
