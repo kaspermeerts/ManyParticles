@@ -241,7 +241,11 @@ bool allocWorld()
 	}
 
 	world.grid = calloc(nb * nb * nb, sizeof(*(world.grid)));
-
+	if (world.grid == NULL)
+	{
+		MEM_ERROR(nb * nb * nb * sizeof(*world.grid));
+		return false;
+	}
 	return true;
 }
 

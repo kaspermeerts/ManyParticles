@@ -3,5 +3,6 @@
 
 int initRender(void);
 int render(void);
+int renderLoop(void);
 
 #endif
