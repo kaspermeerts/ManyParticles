@@ -1,5 +1,10 @@
+*.toc
+*.snm
+*.nav
+*.out
 *.blg
 *.bbl
+*.pdf
 *.o
 .*.swp
 *.log

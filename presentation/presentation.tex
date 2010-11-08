@@ -1,13 +1,21 @@
 \documentclass{beamer}
 \usepackage{lmodern}
 \usepackage{graphicx}
-\usetheme{Berkeley}
-\input{../report/commands}
-\newcommand{\figscale}{0.5}
+\usetheme{Warsaw}
+\newcommand{\scale}{0.5}
+\newcommand{\figscale}[2]{
+	\begin{center}
+	\scalebox{#1}{
+	%	\nonstopmode
+		\input{images/#2.tex}
+	%	\errorstopmode
+	}
+	\end{center}
+}
 \newcommand{\items}[1]{\begin{itemize} #1 \end{itemize}}
 
-\title{Simulating a many-particle system using space partitioning}
-\author{Roald Frederickx\\Kasper Meerts}
+\title{Simulation of a many-particle system using space partitioning}
+\author{Roald Frederickx \and Kasper Meerts}
 \date{10 November 2010}
 \begin{document}
 
@@ -20,17 +28,109 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Wat?}
-\items{
-\item Deeltjessimulatie
-	\begin{itemize}
-		\item{Korte-afstand interaction}
-		\item{Korte-afstand interaction}
-		\item{Korte-afstand interaction}
-	\end{itemize}
+\frametitle{Relevantie}
+Veel fysische systemen te modelleren door interagerende deeltjes
+
+Bijvoorbeeld
+\begin{itemize}
 \item Ideaal gas
 \item Elektronen in metaal
+\item Maxwell-Boltzmann verdeling
+\item Adsorptie
+\item Diffusie
+\item Warmtegeleiding
+\end{itemize}
+
+Enkel korte-afstand interactie!
+\end{frame}
+
+\begin{frame}
+\frametitle{Simulatie --- Na\"ief}
+\begin{itemize}
+\item Elk paar apart bekijken
+\item $O(n^2)$
+\item Veel overbodig werk
+\end{itemize}
+\figscale{0.6}{quadraticComplexity}
+\end{frame}
+
+\begin{frame}
+\frametitle{Oplossing: Space partitioning}
+\begin{itemize}
+\item Ruimte onderverdelen in ``dozen''
+\item $n$ deeltjes
+\item $x$ deeltjes per doos
+\item $n/x$ dozen
+\item Complexiteit $O(n/x \cdot x^2) = O(nx) = O(n)$
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.4\textwidth]{images/grid.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Implementatie}
+\begin{itemize}
+\item Programmeertaal: C
+\item Harde bollen
+\item Elastische botsingen
+	\begin{itemize}
+	\item A posteriori
+	\item Backtracking
+	\end{itemize}
+\item ``Doos'' = lijst
+\end{itemize}
+Testen op botsingen
+\begin{itemize}
+\item Binnen eigen doos
+\item Buurdozen
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Wereld vullen}
+\begin{itemize}
+\item Genereer willekeurige positie
+\item Zolang botsing: probeer opnieuw
+\end{itemize}
+
+Volumefractie gestapelde bollen:
+\begin{itemize}
+\item Maximaal $\approx74\%$ op een regelmatig rooster
+\item Willekeurig $\approx63\%$ mits ``schudden''
+\item Ons algoritme $\approx52\%$
+\end{itemize}
+\begin{center}
+\scalebox{0.45}{
+	\input{images/fillJcurve.tex}
 }
+\includegraphics[width=0.4\textwidth]{images/maxDensity.png}
+\end{center}
+\end{frame}
+
+\begin{frame}
+\frametitle{Performance}
+\figscale{0.8}{fixedPartnum}
+\end{frame}
+
+\begin{frame}
+\frametitle{Performance}
+\figscale{0.8}{idealNboxR0p5}
+\end{frame}
+
+\begin{frame}
+\frametitle{Performance}
+\figscale{0.8}{idealNboxR0p1-1M}
+\end{frame}
+
+\begin{frame}
+\frametitle{Performance}
+\figscale{0.8}{linearComplexity}
+\end{frame}
+
+\begin{frame}
+\frametitle{Performance}
+\figscale{0.8}{linearComplexityR0p1-1M}
 \end{frame}
 
 \end{document}

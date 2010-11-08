@@ -28,7 +28,7 @@ plot(npart / 1000, msPerIter, "o");
 
 name='linearComplexityR0p1-1M';
 ylabrule='0.3cm';
-xlab='Number of particles $\times$ 1000)';
+xlab='Number of particles $\times$ 1000';
 ylab='Milliseconds per iteration';
 width='700';
 height='500';
