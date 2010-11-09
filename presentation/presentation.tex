@@ -1,7 +1,9 @@
 \documentclass{beamer}
 \usepackage{lmodern}
 \usepackage{graphicx}
-\usetheme{Warsaw}
+\usetheme{Berkeley}
+\setbeamertemplate{navigation symbols}{}
+
 \newcommand{\scale}{0.5}
 \newcommand{\figscale}[2]{
 	\begin{center}
@@ -27,6 +29,7 @@
 \tableofcontents
 \end{frame}
 
+\section{Inleiding}
 \begin{frame}
 \frametitle{Relevantie}
 Veel fysische systemen te modelleren door interagerende deeltjes
@@ -35,7 +38,7 @@ Bijvoorbeeld
 \begin{itemize}
 \item Ideaal gas
 \item Elektronen in metaal
-\item Maxwell-Boltzmann verdeling
+\item Maxwell-Boltzmann verdeling fi ffi fl
 \item Adsorptie
 \item Diffusie
 \item Warmtegeleiding
@@ -68,6 +71,7 @@ Enkel korte-afstand interactie!
 \end{center}
 \end{frame}
 
+\section{Implementatie}
 \begin{frame}
 \frametitle{Implementatie}
 \begin{itemize}
@@ -108,6 +112,7 @@ Volumefractie gestapelde bollen:
 \end{center}
 \end{frame}
 
+\section{Performance}
 \begin{frame}
 \frametitle{Performance}
 \figscale{0.8}{fixedPartnum}
@@ -125,7 +130,7 @@ Volumefractie gestapelde bollen:
 
 \begin{frame}
 \frametitle{Performance}
-\figscale{0.8}{linearComplexity}
+\figscale{0.8}{linearComplexityR0p5}
 \end{frame}
 
 \begin{frame}
@@ -133,4 +138,18 @@ Volumefractie gestapelde bollen:
 \figscale{0.8}{linearComplexityR0p1-1M}
 \end{frame}
 
+\begin{frame}
+\frametitle{Performance conclusie}
+\begin{itemize}
+\item $\sim$\,10 dozen per deeltje
+\item $O(n^2) \rightarrow O(n)$
+\item 5 jaar $\rightarrow$ 1 seconde
+\end{itemize}
+\end{frame}
+
+\section{Toepassingen}
+\subsection{Maxwell-Boltzmann}
+\begin{frame}
+
+\end{frame}
 \end{document}

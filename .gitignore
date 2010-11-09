@@ -4,7 +4,6 @@
 *.out
 *.blg
 *.bbl
-*.pdf
 *.o
 .*.swp
 *.log
