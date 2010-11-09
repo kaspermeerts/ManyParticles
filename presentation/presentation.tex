@@ -1,11 +1,11 @@
 \documentclass{beamer}
 \usepackage{lmodern}
 \usepackage{graphicx}
-\usetheme{Berkeley}
+\usetheme{Warsaw}
 \setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{frametitle}{}
 
-\newcommand{\scale}{0.5}
-\newcommand{\figscale}[2]{
+\newcommand{\includeGraph}[2]{
 	\begin{center}
 	\scalebox{#1}{
 	%	\nonstopmode
@@ -14,7 +14,11 @@
 	}
 	\end{center}
 }
-\newcommand{\items}[1]{\begin{itemize} #1 \end{itemize}}
+\newcommand{\includePicture}[2]{
+	\begin{center}
+	\includegraphics[width=#1\textwidth]{images/#2}
+	\end{center}
+}
 
 \title{Simulation of a many-particle system using space partitioning}
 \author{Roald Frederickx \and Kasper Meerts}
@@ -25,40 +29,40 @@
 \titlepage
 \end{frame}
 
+\section{Inleiding}
+\subsection{Inhoud}
 \begin{frame}
-\tableofcontents
+\tableofcontents[hideallsubsections]
 \end{frame}
 
-\section{Inleiding}
+\subsection{Probleemstelling}
 \begin{frame}
-\frametitle{Relevantie}
 Veel fysische systemen te modelleren door interagerende deeltjes
 
 Bijvoorbeeld
 \begin{itemize}
 \item Ideaal gas
 \item Elektronen in metaal
-\item Maxwell-Boltzmann verdeling fi ffi fl
-\item Adsorptie
 \item Diffusie
 \item Warmtegeleiding
+\item Adsorptie
 \end{itemize}
 
-Enkel korte-afstand interactie!
+Enkel korte-afstand interactie (``botsen'')!
 \end{frame}
 
+\subsection{Na\"ief}
 \begin{frame}
-\frametitle{Simulatie --- Na\"ief}
 \begin{itemize}
 \item Elk paar apart bekijken
-\item $O(n^2)$
+\item $n(n-1)/2$ paren $\Rightarrow O(n^2)$
 \item Veel overbodig werk
 \end{itemize}
-\figscale{0.6}{quadraticComplexity}
+\includeGraph{0.6}{quadraticComplexity}
 \end{frame}
 
+\subsection{Space partitioning}
 \begin{frame}
-\frametitle{Oplossing: Space partitioning}
 \begin{itemize}
 \item Ruimte onderverdelen in ``dozen''
 \item $n$ deeltjes
@@ -72,8 +76,8 @@ Enkel korte-afstand interactie!
 \end{frame}
 
 \section{Implementatie}
+\subsection{Algemeen}
 \begin{frame}
-\frametitle{Implementatie}
 \begin{itemize}
 \item Programmeertaal: C
 \item Harde bollen
@@ -91,8 +95,8 @@ Testen op botsingen
 \end{itemize}
 \end{frame}
 
+\subsection{Opvullen wereld}
 \begin{frame}
-\frametitle{Wereld vullen}
 \begin{itemize}
 \item Genereer willekeurige positie
 \item Zolang botsing: probeer opnieuw
@@ -113,33 +117,38 @@ Volumefractie gestapelde bollen:
 \end{frame}
 
 \section{Performance}
+\subsection{Effect van partitioning}
 \begin{frame}
-\frametitle{Performance}
-\figscale{0.8}{fixedPartnum}
+\begin{columns}
+\begin{column}{0.85\textwidth}
+\includeGraph{0.75}{fixedPartnum}
+\end{column}
+\begin{column}{0.15\textwidth}
+10\,000 deeltjes
+\end{column}
+\end{columns}
+\end{frame}
+
+\subsection{Ideaal aantal dozen}
+\begin{frame}
+\includeGraph{0.8}{idealNboxR0p5}
 \end{frame}
 
 \begin{frame}
-\frametitle{Performance}
-\figscale{0.8}{idealNboxR0p5}
+\includeGraph{0.8}{idealNboxR0p1-1M}
+\end{frame}
+
+\subsection{Complexiteit}
+\begin{frame}
+\includeGraph{0.8}{linearComplexityR0p5}
 \end{frame}
 
 \begin{frame}
-\frametitle{Performance}
-\figscale{0.8}{idealNboxR0p1-1M}
+\includeGraph{0.8}{linearComplexityR0p1-1M}
 \end{frame}
 
+\subsection{Conclusie}
 \begin{frame}
-\frametitle{Performance}
-\figscale{0.8}{linearComplexityR0p5}
-\end{frame}
-
-\begin{frame}
-\frametitle{Performance}
-\figscale{0.8}{linearComplexityR0p1-1M}
-\end{frame}
-
-\begin{frame}
-\frametitle{Performance conclusie}
 \begin{itemize}
 \item $\sim$\,10 dozen per deeltje
 \item $O(n^2) \rightarrow O(n)$
@@ -150,6 +159,60 @@ Volumefractie gestapelde bollen:
 \section{Toepassingen}
 \subsection{Maxwell-Boltzmann}
 \begin{frame}
-
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\includePicture{1.00}{maxwellRender.png}
+\end{column}
+\begin{column}{0.3\textwidth}
+8\,000 deeltjes
+\end{column}
+\end{columns}
 \end{frame}
+
+\begin{frame}
+\includeGraph{0.8}{relax}
+\end{frame}
+
+\begin{frame}
+\includeGraph{0.8}{maxwell}
+\end{frame}
+
+\subsection{Brownse beweging}
+\begin{frame}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\includePicture{1.00}{brownRender.png}
+\end{column}
+\begin{column}{0.3\textwidth}
+10\,000 deeltjes
+
+1 groot deeltje
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\includeGraph{0.6}{brown}
+\end{frame}
+
+\subsection{Andere toepassingen}
+\begin{frame}
+\begin{itemize}
+\item Van der Waals correctie
+\item Diffusie
+\item Warmte-geleiding
+\item Klassiek adsorptiemodel
+\end{itemize}
+\end{frame}
+
+\section{Conclusie}
+\begin{frame}
+Space partitioning:
+\begin{itemize}
+\item Korte-afstand interacties
+\item $O(n^2) \rightarrow O(n)$
+\item Zonder verlies van correctheid
+\end{itemize}
+\end{frame}
+
 \end{document}
