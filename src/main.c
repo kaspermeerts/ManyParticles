@@ -18,7 +18,6 @@
 #include "system.h"
 #include "render.h"
 
-int renderLoop(void);
 static void parseArguments(int argc, char **argv);
 static void printStats(void);
 

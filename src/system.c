@@ -156,6 +156,8 @@ static void handleCollisionHuge(Particle *p)
 	mindist = config.radius + config.radiusHuge;
 
 	dt = (dvdr + sqrt(dvdr*dvdr + dvsq*(mindist * mindist - drsq))) / dvsq;
+	if (fabs(dt) > 2 * config.timeStep)
+		return;
 
 	scale(&p->vel, -dt, &dx1);
 	scale(&huge.vel, -dt, &dx2);
@@ -275,7 +277,7 @@ void fillWorld()
 	huge.vel.z = 0;
 
 	config.radiusHuge = config.radius * 20;
-	config.massHuge = 1;
+	config.massHuge = 10;
 #endif
 
 	for (i = 0; i < config.numParticles; i++)

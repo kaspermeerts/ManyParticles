@@ -29,10 +29,19 @@ static int numVertices;
 static int numIndices;
 static Vertex3 *sphereVertex;
 static GLushort *sphereIndex;
+
+#ifdef BROWNIAN
+static int numHugeVertices;
+static int numHugeIndices;
+static Vertex3 *hugeVertex;
+static GLushort *hugeIndex;
+#endif
+
 static SDL_Surface *surface;
 static float angle;
 
-static void createSphere(int slices);
+static void createSphere(int slices, int *numVert, Vertex3 **vertices, int *numInd,
+		GLushort **indices);
 static void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, 
 		GLdouble zFar);
 static void calcFps(void);
@@ -163,12 +172,16 @@ int initRender(void)
 
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 
-	createSphere(16);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
+
+	createSphere(4, &numVertices, &sphereVertex, &numIndices, &sphereIndex);
 	glVertexPointer(3, GL_FLOAT, sizeof(Vertex3), sphereVertex);
 	glNormalPointer(   GL_FLOAT, sizeof(Vertex3), sphereVertex);
 
+#ifdef BROWNIAN
+	createSphere(16, &numHugeVertices, &hugeVertex, &numHugeIndices, &hugeIndex);
+#endif
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -189,7 +202,7 @@ int render(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-/*	angle += 0.10;*/
+/*	angle += 0.01;*/
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -211,48 +224,55 @@ int render(void)
 		glVertex3f(+s/2, +s/2, -s/2);
 	glEnd();
 
-#ifdef BROWNIAN
-	renderSphere(huge.pos.x - s/2, huge.pos.y - s/2, huge.pos.z - s/2,
-			config.radiusHuge);
-#endif
 	glColor3f(0.0, 0.7, 0.0);
 	glPointSize(2);
 	for (i = 0; i < config.numParticles; i++)
 	{
 		Particle *p = &world.parts[i];
 
-#if 1
 		glPushMatrix();
 			glTranslatef(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2);
 			glScalef(config.radius, config.radius, config.radius);
 			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, sphereIndex);
 		glPopMatrix();
-#else
-		renderSphere(p->pos.x - s/2, p->pos.y - s/2, p->pos.z - s/2, 
-				config.radius);
-#endif
-		glColor3f(1.0, 0.0, 0.0);
 	}
 
-	
+#ifdef BROWNIAN
+	glVertexPointer(3, GL_FLOAT, sizeof(Vertex3), hugeVertex);
+	glNormalPointer(   GL_FLOAT, sizeof(Vertex3), hugeVertex);
+
+	glPushMatrix();
+	    glTranslatef(huge.pos.x - s/2, huge.pos.y - s/2, huge.pos.z - s/2);
+	    glScalef(config.radiusHuge, config.radiusHuge, config.radiusHuge);
+	    glDrawElements(GL_TRIANGLES, numHugeIndices, GL_UNSIGNED_SHORT, hugeIndex);
+	glPopMatrix();
+
+	glVertexPointer(3, GL_FLOAT, sizeof(Vertex3), sphereVertex);
+	glNormalPointer(   GL_FLOAT, sizeof(Vertex3), sphereVertex);
+#endif
+
 	SDL_GL_SwapBuffers();
 
 	return 0;
 }
 
-static void createSphere(int slices)
+static void createSphere(int slices, int *numVert, Vertex3 **vertices, int *numInd,
+		GLushort **indices)
 {
 	int i, j, k;
 	float x, y, z;
 	float r;
 	int stacks;
+	Vertex3 *vert;
+	GLushort *ind;
 
 	stacks = slices;
 	slices *= 2;
 
 	/* Plus two for the poles */
-	numVertices = (stacks - 1) * slices + 2;
-	sphereVertex = calloc(numVertices, sizeof(Vertex3));
+	*numVert = (stacks - 1) * slices + 2;
+	*vertices = calloc(*numVert, sizeof(Vertex3));
+	vert = *vertices;
 
 	/* All but the top and bottom stack */
 	for (i = 1; i < stacks; i++)
@@ -268,45 +288,46 @@ static void createSphere(int slices)
 			x = r * sin(theta);
 			y = r * cos(theta);
 
-			sphereVertex[(i-1) * slices + j + 1].x = x;
-			sphereVertex[(i-1) * slices + j + 1].y = y;
-			sphereVertex[(i-1) * slices + j + 1].z = z;
+			vert[(i-1) * slices + j + 1].x = x;
+			vert[(i-1) * slices + j + 1].y = y;
+			vert[(i-1) * slices + j + 1].z = z;
 		}
 	}
 
 	/* Top and bottom */
-	sphereVertex[0].x = 0;
-	sphereVertex[0].y = 0;
-	sphereVertex[0].z = 1;
+	vert[0].x = 0;
+	vert[0].y = 0;
+	vert[0].z = 1;
 
-	sphereVertex[numVertices-1].x = 0;
-	sphereVertex[numVertices-1].y = 0;
-	sphereVertex[numVertices-1].z = -1;
+	vert[*numVert-1].x = 0;
+	vert[*numVert-1].y = 0;
+	vert[*numVert-1].z = -1;
 
-	numIndices = (stacks - 1) * slices * 6;
-	sphereIndex = calloc(numIndices, sizeof(GLushort));
+	*numInd = (stacks - 1) * slices * 6;
+	*indices = calloc(*numInd, sizeof(GLushort));
+	ind = *indices;
 
 	k = 0;
 
 	for (i = 1; i < slices; i++)
 	{
-		sphereIndex[k++] = 0;
-		sphereIndex[k++] = i;
-		sphereIndex[k++] = i+1;
+		ind[k++] = 0;
+		ind[k++] = i;
+		ind[k++] = i+1;
 	}
-	sphereIndex[k++] = 0;
-	sphereIndex[k++] = 1;
-	sphereIndex[k++] = slices;
+	ind[k++] = 0;
+	ind[k++] = 1;
+	ind[k++] = slices;
 	
 	for (i = 0; i < slices - 1; i++)
 	{
-		sphereIndex[k++] = numVertices - 1;
-		sphereIndex[k++] = (numVertices - 1 - slices) + i;
-		sphereIndex[k++] = (numVertices - 1 - slices) + i + 1;
+		ind[k++] = *numVert - 1;
+		ind[k++] = (*numVert - 1 - slices) + i;
+		ind[k++] = (*numVert - 1 - slices) + i + 1;
 	}
-	sphereIndex[k++] = numVertices - 1;
-	sphereIndex[k++] = numVertices - 1 - 1;
-	sphereIndex[k++] = numVertices - 1 - slices + 0;
+	ind[k++] = *numVert - 1;
+	ind[k++] = *numVert - 1 - 1;
+	ind[k++] = *numVert - 1 - slices + 0;
 
 	for (i = 1; i < stacks - 1; i++)
 	{
@@ -314,74 +335,23 @@ static void createSphere(int slices)
 
 		for (j = 0; j < slices - 1; j++)
 		{
-			sphereIndex[k++] = base + j;
-			sphereIndex[k++] = base + slices + j;
-			sphereIndex[k++] = base + slices + j + 1;
+			ind[k++] = base + j;
+			ind[k++] = base + slices + j;
+			ind[k++] = base + slices + j + 1;
 
-			sphereIndex[k++] = base + j;
-			sphereIndex[k++] = base + j + 1;
-			sphereIndex[k++] = base + slices + j + 1;
+			ind[k++] = base + j;
+			ind[k++] = base + j + 1;
+			ind[k++] = base + slices + j + 1;
 		}
 
-		sphereIndex[k++] = base;
-		sphereIndex[k++] = base + slices - 1;
-		sphereIndex[k++] = base + slices;
+		ind[k++] = base;
+		ind[k++] = base + slices - 1;
+		ind[k++] = base + slices;
 
-		sphereIndex[k++] = base + slices - 1;
-		sphereIndex[k++] = base + slices;
-		sphereIndex[k++] = base + slices + slices - 1;
+		ind[k++] = base + slices - 1;
+		ind[k++] = base + slices;
+		ind[k++] = base + slices + slices - 1;
 	}
 
 	return;
 }
-
-#ifdef BROWNIAN
-static void renderSphere(float x, float y, float z, float r)
-{
-	const int stacks = 16;
-	const int slices = 8;
-	int i, j;
-
-	glBegin(GL_QUAD_STRIP);
-
-	for (i = 0; i < stacks; i++)
-	{
-		float theta1, theta2;
-		float r1, h1, r2, h2;
-
-		theta1 = M_PI * ((float) (i + 0) / stacks) - M_PI/2;
-		theta2 = M_PI * ((float) (i + 1) / stacks) - M_PI/2;
-
-		h1 = r * sin(theta1);
-		r1 = sqrt(r*r - h1*h1);
-
-		h2 = r * sin(theta2);
-		r2 = sqrt(r*r - h2*h2);
-
-		for (j = 0; j <= slices; j++)
-		{
-			float phi;
-			float x1, y1, z1, x2, y2, z2;
-
-			phi = 2 * M_PI * j / slices;
-
-			x1 = r1 * cos(phi);
-			y1 = r1 * sin(phi);
-			z1 = h1;
-
-			x2 = r2 * cos(phi);
-			y2 = r2 * sin(phi);
-			z2 = h2;
-
-			glVertex3f(x + x1, y + y1, z + z1);
-			glNormal3f(x1, y1, z1); 
-			glVertex3f(x + x2, y + y2, z + z2);
-			glNormal3f(x2, y2, z2);
-		}
-	}
-
-	glEnd();
-
-	return;
-}
-#endif
