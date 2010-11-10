@@ -92,10 +92,13 @@ int renderLoop(void)
 					angle++;
 					break;
 				case SDLK_UP:
-					config.timeStep *= 2;
+					config.timeStep *= 1.2;
 					break;
 				case SDLK_DOWN:
-					config.timeStep /= 2;
+					config.timeStep /= 1.2;
+					break;
+				case SDLK_RETURN:
+					SDL_WM_ToggleFullScreen(surface);
 					break;
 				default:
 					break;
