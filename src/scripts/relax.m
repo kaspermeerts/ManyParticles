@@ -17,8 +17,10 @@ c3 = load("relax3-3.csv");
 [x3, y3] = speedHist([c1;c2;c3]);
 
 x = linspace(0, max([x1,x2,x3]), 50);
-plot(x1, y1, 'o-', x2, y2, 'o-', x3, y3, 'o-', x, maxwellDist(1/3,x), 'k');
+h = plot(x1, y1, 'o-', x2, y2, 'o-', x3, y3, 'o-', x, maxwellDist(1/3,x), 'k');
 axis([0 2.5 0 2]);
+set(h, "linewidth", 2);
+set(h, "markersize", 10);
 
 name='relax';
 ylabrule='0.3cm';

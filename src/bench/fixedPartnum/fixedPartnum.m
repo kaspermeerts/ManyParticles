@@ -32,7 +32,8 @@ clf;
 b = load("rad0.1.csv");
 nbox = b(:,1);
 ips = b(:,2);
-plot(nbox, ips, "o");
+h = plot(nbox, ips, "o");
+set(h, "linewidth", 2, "markersize", 5);
 
 name='fixedPartnum';
 ylabrule='0.3cm';

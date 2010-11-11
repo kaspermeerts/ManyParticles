@@ -16,8 +16,9 @@ world3 = load("world3.csv");
 T = 1/3;
 xt = linspace(0,max(x),100);
 yt = maxwellDist(T, xt);
-plot(x, y, 'o', xt, yt);
-
+h = plot(x, y, 'o', xt, yt);
+set(h, "linewidth", 2);
+set(h, "markersize", 10);
 axis([0,2.5,0,1.2]);
 
 name='maxwell';
