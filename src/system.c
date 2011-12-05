@@ -410,7 +410,7 @@ void stepWorld(void)
 	Box *origBox, *newBox;
 	float dt = config.timeStep;
 	int nb = config.numBox;
-	int i, j;
+	int i, j, n;
 
 	/* XXX Does it make sense to do this in one run? */
 	for (i = 0; i < nb*nb*nb; i++)
@@ -456,7 +456,10 @@ void stepWorld(void)
 		if (p == NULL)
 			continue;
 
-		for (j = 0; j < origBox->n; j++)
+		n = origBox->n; /* Save original number because this can 
+				   change if we swap out particles in the 
+				   loop below! */
+		for (j = 0; j < n; j++)
 		{
 			/* Since p might be removed, we keep a pointer to 
 			 * its successor */
