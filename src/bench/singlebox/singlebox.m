@@ -10,8 +10,10 @@ ips = b(:,2);
 msPerIter = 1000 ./ ips;
 
 fit = polyfit(npart, msPerIter, 2);
-plot(npart, msPerIter, "o", npart, polyval(fit, npart));
+h = plot(npart, msPerIter, "o", npart, polyval(fit, npart));
 axis([0 1 0 12000],'autox');
+set(h, "linewidth", 2);
+set(h, "markersize", 5);
 
 name='quadraticComplexity';
 ylabrule='0.3cm';
